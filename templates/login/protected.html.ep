@@ -1,0 +1,10 @@
+% layout 'default';
+% if (my $msg = flash 'message') {
+  <b><%= $msg %></b><br>
+% }
+Welcome <%= session 'user' %>.<br>
+%= link_to Logout => 'logout'
+%= link_to Info => '/info'
+%= link_to Status => '/pi-status'
+%= link_to Bootstrap => '/bootstrap'
+

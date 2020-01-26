@@ -4,17 +4,19 @@
 
 use strict;
 use warnings;
-
 use FindBin;
-BEGIN { unshift @INC, "$FindBin::Bin/../lib" }
+use lib "$FindBin::Bin/../../utilities-perl/lib";
+use SH::UseLib;
+
+# BEGIN { unshift @INC, "$FindBin::Bin/../lib" }
 use Mojolicious::Commands;
 
 =head1 NAME
 
-web-portal.pl - Master MyApp. The main webserver script.
+web-login.pl - Master login. The main webserver script.
 
 =cut
 
 # Start command line interface for application
-Mojolicious::Commands->start_app('MyApp');
+Mojolicious::Commands->start_app('Login');
 
