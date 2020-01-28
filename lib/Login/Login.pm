@@ -21,7 +21,7 @@ sub login {
 	my $user = $self->param('user') || '';
 	my $pass = $self->param('pass') || '';
 	if($self->logged_in) {
-		return $self->redirect_to($self->tx->req->header(''X-Original-URI')||'index');
+		return $self->redirect_to($self->tx->req->header('X-Original-URI')||'index');
 	}
 	$self->app->log->info("$user tries to log in");
 	if(! $self->users->check($user, $pass) ) {
