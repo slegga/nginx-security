@@ -1,0 +1,13 @@
+---
+common:
+    proxy: 1
+    workers: 4
+web_services:
+    web-nginx-guard.pl:
+        repo: nginx-security
+        port: 8101
+        security_level: public
+    web-login.pl:
+        repo: nginx-security
+        port: 8102
+        security_level: public

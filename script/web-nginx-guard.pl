@@ -1,6 +1,9 @@
 #!/usr/bin/env perl
 use Mojolicious::Lite;
-plugin Config => {default => {hypnotoad => { listen => ['http://127.0.0.1:8101'], proxy => 1, workers => 4 }}};
+use Mojo::File 'path';
+use File::Basename;
+my $name = fileparse($0,'.pl');
+plugin Config => {default => {hypnotoad => { listen => ['http://127.0.0.1:8101'], proxy => 1, workers => 4, pid_file => path('/var/run')->child($name.'.pid')->to_string}}};
 
 app->sessions->cookie_name('nginx-guard');
 app->sessions->default_expiration( 3600 * 1 );
