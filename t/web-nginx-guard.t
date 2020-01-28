@@ -13,6 +13,6 @@ $t->ua->on(start => sub {
   my ($ua, $tx) = @_;
   $tx->req->headers->header('X-Original-URI' => 'https://baedi.no/');
 });
-$t->tx($t->tx->get_ok('/')->status_is(401);
+$t->get_ok('/')->status_is(401);
 done_testing();
 

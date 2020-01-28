@@ -1,77 +1,55 @@
 package Model::GetCommonConfig;
 use Mojo::Base -base, -signatures;
 use Mojo::SQLite;
+use Mojo::File 'path';
 use open ':encoding(UTF-8)';
-
-
-
+use YAML::Tiny;
+use Data::Dumper;
+use File::Basename;
 
 =head1 NAME
 
-Model::GetHypnotoadConfig.pm - Return the hypnotoad hash config for filename. Read $HOME/etc/hypnotoad.yml
+Model::GetCommonConfig - Module for extracting common config. Especially hypnotoad.
 
 =head1 DESCRIPTION
 
-<DESCRIPTION>
+Give config for script.
 
 =head1 ATTRIBUTES
 
-=head2 dbfile
+=head2 config_dir
 
-Name of dbfile
-
-=head2 sqlite
-
-Default to a new Mojo::SQLite object
-
-=head2 db
-
-Default to a new Mojo::SQLite::Database object
+Default to ~/etc
 
 =cut
 
-has dbfile => $ENV{HOME}.'/etc/GetHypnotoadConfig.db';
-has sqlite => sub {
-	my $self = shift;
-	if ( -f $self->dbfile) {
-		return Mojo::SQLite->new()->from_filename($self->dbfile);
-	} else {
-		my $path = path($self->dbfile)->dirname;
-		if (!-d "$path" ) {
-			$path->make_path;
-		}
-		return Mojo::SQLite->new("file:".$self->dbfile);
-	#	die "COULD NOT CREATE FILE ".$self->dbfile if ! -f $self->dbfile;
-	}
-
-};
-has db => sub {shift->sqlite->db};
-
-
-option 'dryrun!', 'Print to screen instead of doing changes';
+has config_dir => sub{ path($ENV{HOME})->child('etc') };
 
 =head1 METHODS
 
-=head2 read
-
-...
+=head2 get_hypnotoad_config
 
 =cut
 
-sub read {
+sub get_hypnotoad_config {
     my $self = shift;
-    my $res = $self->db->query(q|select a, b from c|);
-    die $res->stderr if ($res->err);
+    my $script = basename(shift);
+ 	my $raw_hr = YAML::Tiny->read( $self->config_dir->child('hypnotoad.yml') )->[0];
+# 	say Dumper $raw_hr;
+ 	my $return;
+ 	$return = $raw_hr->{common};
+ 	if (exists $raw_hr->{web_services}->{$script}) {
+ 		my $tmp = $raw_hr->{web_services}->{$script};
+		if (exists $tmp->{port}) {
+			push @{$return->{listen}},'127.0.0.1:'.$tmp->{port} ;
+		}
+
+ 	} else {
+ 		die "Missing config for $script";
+ 	}
+ 	$return->{pid_file} = '/run/'.$script.'.pid';
+ 	return $return;
 }
 
-sub write {
-    my $self = shift;
-    my $hash =shift;
-    my @keys = keys %$hash;
-    my @values = values %$hash;
-    my $res = $self->db->query('replace into c('.join(',',@keys).')', @values);
-    die $res->stderr if ($res->err);
-}
 
-
-__PACKAGE__->new(options_cfg=>{extra=>1})->main();
+1;

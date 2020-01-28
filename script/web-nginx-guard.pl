@@ -2,6 +2,8 @@
 use Mojolicious::Lite;
 use Mojo::File 'path';
 use File::Basename;
+use Model::GetCommonConfig;
+my $gcc = Model::GetCommonConfig->new;
 my $name = fileparse($0,'.pl');
 plugin Config => {default => {hypnotoad => { listen => ['http://127.0.0.1:8101'], proxy => 1, workers => 4, pid_file => path('/var/run')->child($name.'.pid')->to_string}}};
 
@@ -25,6 +27,15 @@ get '/' => sub {
         $c->render( text => 'nginx is not configured.', status => 500 );
     }
 	elsif ( $c->session('username') ) {
+	        $c->req->env->{identity} = $c->session('username');
+	        if ( $uri =~ m!/logout\b! ) {
+	            $c->session( expires => 1, nms_expires => 1 );
+	        }
+	        $c->res->headers->header( 'X-User', $c->session('username') );
+	        $c->render( text => 'Logged in', status => 200 );
+		}
+	elsif ( $c->tx->req->header('X-Common-Name') ) {
+		$c->session->{username} = $c->tx->req->header('X-Common-Name');
         $c->req->env->{identity} = $c->session('username');
         if ( $uri =~ m!/logout\b! ) {
             $c->session( expires => 1, nms_expires => 1 );
