@@ -20,6 +20,7 @@ sub login {
 	my $self = shift;
 	my $user = $self->param('user') || '';
 	my $pass = $self->param('pass') || '';
+	$DB::single=2;
 	if($self->logged_in) {
 		return $self->redirect_to($self->tx->req->header('X-Original-URI')||'index');
 	}
@@ -63,4 +64,14 @@ sub logout {
   $self->redirect_to('login');
 }
 
+=head2 protected
+
+Landing page.
+
+=cut
+
+sub protected {
+	my $self = shift;
+	return $self->render(text=>'ok');
+}
 1;
