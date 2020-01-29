@@ -4,8 +4,9 @@ use Mojo::File 'path';
 use File::Basename;
 use Model::GetCommonConfig;
 my $gcc = Model::GetCommonConfig->new;
-my $name = fileparse($0,'.pl');
-plugin Config => {default => {hypnotoad => { listen => ['http://127.0.0.1:8101'], proxy => 1, workers => 4, pid_file => path('/var/run')->child($name.'.pid')->to_string}}};
+#my $name = fileparse($0,'.pl');
+plugin Config => {default => $gcc->get_hypnotoad_config($0) };
+
 
 app->sessions->cookie_name('nginx-guard');
 app->sessions->default_expiration( 3600 * 1 );
@@ -34,19 +35,25 @@ get '/' => sub {
 	        $c->res->headers->header( 'X-User', $c->session('username') );
 	        $c->render( text => 'Logged in', status => 200 );
 		}
-	elsif ( $c->tx->req->header('X-Common-Name') ) {
-		$c->session->{username} = $c->tx->req->header('X-Common-Name');
-        $c->req->env->{identity} = $c->session('username');
-        if ( $uri =~ m!/logout\b! ) {
-            $c->session( expires => 1, nms_expires => 1 );
-        }
-        $c->res->headers->header( 'X-User', $c->session('username') );
-        $c->render( text => 'Logged in', status => 200 );
-	}
 	else {
-        $c->session( expires => ( $c->session('nms_expires') || time + 3600 ) );
-        $c->app->log->debug("[$username] No username in session.");
-        $c->render( text => 'Use 401 instead of 302 for redirect in nginx', status => 401 );
+		my $headers = $c->tx->req->headers;
+		my $user;
+		$user = $headers->header('X-Common-Name') if ($headers);
+
+		if ( $user ) {
+			$c->session->{username} = $user;
+	        $c->req->env->{identity} = $user;
+	        if ( $uri =~ m!/logout\b! ) {
+	            $c->session( expires => 1, nms_expires => 1 );
+	        }
+	        $c->res->headers->header( 'X-User', $c->session('username') );
+	        $c->render( text => 'Logged in', status => 200 );
+		}
+		else {
+	        $c->session( expires => ( $c->session('nms_expires') || time + 3600 ) );
+	        $c->app->log->debug("[$username] No username in session.");
+	        $c->render( text => 'Use 401 instead of 302 for redirect in nginx', status => 401 );
+	    }
     }
 };
 

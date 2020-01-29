@@ -4,6 +4,7 @@ use Mojolicious::Plugins;
 use FindBin;
 use lib "$FindBin::Bin/../../utilities-perl/lib";
 use SH::UseLib;
+use Model::GetCommonConfig;
 
 use MyApp::Model::Users;
 
@@ -27,11 +28,12 @@ Main loop for Login page.
 
 sub startup {
 	my $self = shift;
-	my $conf_dir = $ENV{MOJO_CONFIG} ? $ENV{MOJO_CONFIG} : $ENV{HOME}.'/etc';
-	my $conf_file = $conf_dir.'/myapp.conf';
-	$self->plugin(Config => {default => {hypnotoad => { listen => ['http://127.0.0.1:8102'], proxy => 1, workers => 3 }}});
-		die "Missing config file: ".$conf_file if !-f $conf_file;
-	my $config = $self->plugin('Mojolicious::Plugin::Config' => {file => $conf_file});
+#	my $conf_dir = $ENV{MOJO_CONFIG} ? $ENV{MOJO_CONFIG} : $ENV{HOME}.'/etc';
+#	my $conf_file = $conf_dir.'/myapp.conf';
+	my $gcc = Model::GetCommonConfig->new;
+	$self->plugin(Config => {default => $gcc->get_hypnotoad_config($0)});
+#		die "Missing config file: ".$conf_file if !-f $conf_file;
+	my $config = $gcc->get_mojoapp_config($0);
 	$self->plugin('Mojolicious::Plugin::AccessLog' => {log => $config->{'accesslogfile'},
 		format => ' %h %u %{%c}t "%r" %>s %b "%{Referer}i" "%{User-Agent}i"'});
 	push @{$self->static->paths}, $self->home->rel_file('static');
