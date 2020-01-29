@@ -1,0 +1,4 @@
+web-login:
+  secrects:
+    - abc
+    - 123
