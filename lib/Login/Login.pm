@@ -73,12 +73,12 @@ Landing page.
 sub landing_page {
 	my $self = shift;
 	if ($self->logged_in) {
-		if ($c->param('redirect_uri')) {
-			return $self->redirect_to($self->tx->req->header('X-Original-URI')||$c->param('redirect_uri'));
+		if ($self->param('redirect_uri')) {
+			return $self->redirect_to($self->tx->req->header('X-Original-URI')||$self->param('redirect_uri'));
 		}
 		return $self->render(text=>'ok');
 	} else {
-		$self->res_status(401);
+		$self->res->status(401);
 		return $self->render(text=>'Not logged in');
 	}
 }

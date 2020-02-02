@@ -1,4 +1,4 @@
-common:
+common_config:
   secrets:
     - abc
     - 123

@@ -42,7 +42,7 @@ sub get_hypnotoad_config {
  	my $raw_hr = YAML::Tiny->read( $self->config_dir->child('hypnotoad.yml') )->[0];
 # 	say Dumper $raw_hr;
  	my $return;
- 	$return = $raw_hr->{common};
+ 	$return = $raw_hr->{common_config};
  	if (exists $raw_hr->{web_services}->{$script}) {
  		my $tmp = $raw_hr->{web_services}->{$script};
 		if (exists $tmp->{port}) {
@@ -72,7 +72,7 @@ sub get_mojoapp_config {
     die "Common config file $file does not exists" if ! -e $file;
  	my $raw_hr =  YAML::Tiny->read( $file)->[0];
  	my $return;
- 	$return = $raw_hr->{common};
+ 	$return = $raw_hr->{common_config};
  	if (exists $raw_hr->{web_services}->{$script}) {
 		my $tmp = $raw_hr->{web_services}->{$script};
 		for my $key(keys %$tmp) {
