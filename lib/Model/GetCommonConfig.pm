@@ -71,9 +71,17 @@ sub get_mojoapp_config {
     my $file = $self->config_dir->child('mojoapp.yml')->to_string;
     die "Common config file $file does not exists" if ! -e $file;
  	my $raw_hr =  YAML::Tiny->read( $file)->[0];
+ 	my $return;
+ 	$return = $raw_hr->{common};
+ 	if (exists $raw_hr->{web_services}->{$script}) {
+		my $tmp = $raw_hr->{web_services}->{$script};
+		for my $key(keys %$tmp) {
+			$return->{$key} = $tmp->{$key};
+		}
+ 	}
+
  	die "No config in $file" if ! $raw_hr;
- 	die "No config in $file for script $script" if exists $raw_hr->{$script};
- 	return $raw_hr->{$script};
+ 	return $return;
 }
 
 1;

@@ -22,7 +22,7 @@ sub login {
 	my $pass = $self->param('pass') || '';
 	$DB::single=2;
 	if($self->logged_in) {
-		return $self->redirect_to($self->tx->req->header('X-Original-URI')||'index');
+		return $self->redirect_to($self->tx->req->header('X-Original-URI')||'landing_page');
 	}
 	$self->app->log->info("$user tries to log in");
 	if(! $self->users->check($user, $pass) ) {
@@ -35,7 +35,7 @@ sub login {
 	$self->session(user => $user);
 
 	$self->flash(message => 'Thanks for logging in.');
-	$self->redirect_to('index');
+	$self->redirect_to('landing_page');
 }
 
 =head2 logged_in
@@ -64,14 +64,22 @@ sub logout {
   $self->redirect_to('login');
 }
 
-=head2 protected
+=head2 landing_page
 
 Landing page.
 
 =cut
 
-sub protected {
+sub landing_page {
 	my $self = shift;
-	return $self->render(text=>'ok');
+	if ($self->logged_in) {
+		if ($c->param('redirect_uri')) {
+			return $self->redirect_to($self->tx->req->header('X-Original-URI')||$c->param('redirect_uri'));
+		}
+		return $self->render(text=>'ok');
+	} else {
+		$self->res_status(401);
+		return $self->render(text=>'Not logged in');
+	}
 }
 1;

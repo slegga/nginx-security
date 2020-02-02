@@ -1,4 +1,7 @@
-web-login:
-  secrects:
+common:
+  secrets:
     - abc
     - 123
+web_services:
+    web-login:
+    web-login.t:

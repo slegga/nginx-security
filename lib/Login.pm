@@ -7,7 +7,7 @@ use SH::UseLib;
 use Model::GetCommonConfig;
 
 use MyApp::Model::Users;
-
+use Data::Dumper;
 
 =head1 NAME
 
@@ -31,9 +31,10 @@ sub startup {
 #	my $conf_dir = $ENV{MOJO_CONFIG} ? $ENV{MOJO_CONFIG} : $ENV{HOME}.'/etc';
 #	my $conf_file = $conf_dir.'/myapp.conf';
 	my $gcc = Model::GetCommonConfig->new;
-	$self->plugin(Config => {default => $gcc->get_hypnotoad_config($0)});
+	$self->plugin(Config => {default => {hypnotoad=>$gcc->get_hypnotoad_config($0)}});
 #		die "Missing config file: ".$conf_file if !-f $conf_file;
 	my $config = $gcc->get_mojoapp_config($0);
+#	warn Dumper $config;
 	$self->plugin('Mojolicious::Plugin::AccessLog' => {log => $config->{'accesslogfile'},
 		format => ' %h %u %{%c}t "%r" %>s %b "%{Referer}i" "%{User-Agent}i"'});
 	push @{$self->static->paths}, $self->home->rel_file('static');
@@ -48,9 +49,9 @@ sub startup {
 	my $r = $self->routes;
 	$r->any('/login')->to('login#login')->name('login');
 	$r->get('/logout')->to('login#logout');
-	my $logged_in = $r->under('/')->to('login#logged_in');
-	$logged_in->get('/protected')->to('login#protected');
-	$logged_in->any('/')->to('login#protected')->name('protected');
+	my $logged_in = $r->under('/')->to('login#landing_page');
+	$logged_in->any('/')->to('login#landing_page')->name('landing_page')->name('landing_page');
+		$logged_in->get('/index')->to('login#landing_page')->name('landing_page');
 }
 
 1;
