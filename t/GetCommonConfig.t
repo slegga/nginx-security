@@ -11,5 +11,5 @@ use Model::GetCommonConfig;
 
 unlike(path('lib/Model/GetCommonConfig.pm')->slurp, qr{\<[A-Z]+\>},'All placeholders are changed');
 my $m  = Model::GetCommonConfig->new(config_dir =>path('t/etc') );
-is_deeply($m->get_hypnotoad_config($0), {listen=>['127.0.0.1:42'], proxy=>1,workers=>4,pid_file=>'/run/GetCommonConfig.t.pid'}, 'output is ok');
+is_deeply($m->get_hypnotoad_config($0), {listen=>['http://127.0.0.1:42'], proxy=>1,workers=>4,pid_file=>'/run/GetCommonConfig.t.pid'}, 'output is ok');
 done_testing;

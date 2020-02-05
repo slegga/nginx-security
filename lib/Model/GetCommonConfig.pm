@@ -46,7 +46,7 @@ sub get_hypnotoad_config {
  	if (exists $raw_hr->{web_services}->{$script}) {
  		my $tmp = $raw_hr->{web_services}->{$script};
 		if (exists $tmp->{port}) {
-			push @{$return->{listen}},'127.0.0.1:'.$tmp->{port} ;
+			push @{$return->{listen}},'http://127.0.0.1:'.$tmp->{port} ;
 		}
 
  	} else {
