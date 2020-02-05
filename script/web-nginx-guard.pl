@@ -2,6 +2,9 @@
 use Mojolicious::Lite;
 use Mojo::File 'path';
 use File::Basename;
+use FindBin;
+use lib "$FindBin::Bin/../../utilities-perl/lib";
+use SH::UseLib;
 use Model::GetCommonConfig;
 my $gcc = Model::GetCommonConfig->new;
 #my $name = fileparse($0,'.pl');
