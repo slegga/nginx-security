@@ -35,8 +35,10 @@ sub startup {
 #		die "Missing config file: ".$conf_file if !-f $conf_file;
 	my $config = $gcc->get_mojoapp_config($0);
 #	warn Dumper $config;
+	warn("MISSING accesslogfile in config") if ! exists $config->{'accesslogfile'};
 	$self->plugin('Mojolicious::Plugin::AccessLog' => {log => $config->{'accesslogfile'},
 		format => ' %h %u %{%c}t "%r" %>s %b "%{Referer}i" "%{User-Agent}i"'});
+	$self->log->path($config->{mojo_log_path});
 	push @{$self->static->paths}, $self->home->rel_file('static');
 	$self->sessions->cookie_name('nginx-guard');
 	$self->sessions->default_expiration( 3600 * 1 );

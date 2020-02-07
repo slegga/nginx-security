@@ -3,11 +3,11 @@ common_config:
     proxy: 1
     workers: 4
 web_services:
-    web-nginx-guard.pl:
+    web-nginx-guard:
         repo: nginx-security
         port: 8101
         security_level: public
-    web-login.pl:
+    web-login:
         repo: nginx-security
         port: 8102
         security_level: public

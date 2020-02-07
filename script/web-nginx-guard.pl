@@ -15,6 +15,8 @@ app->config(hypnotoad => $gcc->get_hypnotoad_config($0));
 app->sessions->cookie_name('nginx-guard');
 app->sessions->default_expiration( 3600 * 1 );
 app->sessions->secure( $ENV{TEST_INSECURE_COOKIES} ? 0 : 1 );
+app->log->path(app->config('mojo_log_path'));
+
 hook before_dispatch => sub { shift->res->headers->server('Some server'); };
 
 get '/' => sub {

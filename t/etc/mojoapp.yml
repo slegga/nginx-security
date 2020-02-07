@@ -2,6 +2,7 @@ common_config:
   secrets:
     - abc
     - 123
+  mojo_log_path: t/playground
 web_services:
     web-login:
     web-login.t:

@@ -38,8 +38,9 @@ Return hypnotoad config from common config file
 sub get_hypnotoad_config {
     my $self = shift;
     die "Not an object $self" if !ref $self;
-    my $script = basename(shift);
- 	my $raw_hr = YAML::Tiny->read( $self->config_dir->child('hypnotoad.yml') )->[0];
+    my $script = basename(shift,'.pl');
+    my $cfile = $self->config_dir->child('hypnotoad.yml');
+ 	my $raw_hr = YAML::Tiny->read( $cfile )->[0];
 # 	say Dumper $raw_hr;
  	my $return;
  	$return = $raw_hr->{common_config};
@@ -50,7 +51,7 @@ sub get_hypnotoad_config {
 		}
 
  	} else {
- 		die "Missing config for $script";
+ 		die "Missing config in file ". $cfile->to_string .":  web_services:->$script:";
  	}
  	$return->{pid_file} = '/run/'.$script.'.pid';
  	return $return;
@@ -67,19 +68,20 @@ Return app config from common config file
 sub get_mojoapp_config {
     my $self = shift;
     die "Not an object $self" if !ref $self;
-    my $script = basename(shift);
+    my $script = basename(shift,'.pl');
     my $file = $self->config_dir->child('mojoapp.yml')->to_string;
     die "Common config file $file does not exists" if ! -e $file;
  	my $raw_hr =  YAML::Tiny->read( $file)->[0];
  	my $return;
  	$return = $raw_hr->{common_config};
+    die "Missing mojo_log_path in common_config file $file" if ! exists $return->{mojo_log_path};
  	if (exists $raw_hr->{web_services}->{$script}) {
 		my $tmp = $raw_hr->{web_services}->{$script};
 		for my $key(keys %$tmp) {
 			$return->{$key} = $tmp->{$key};
 		}
  	}
-
+	$return->{mojo_log_path} = path($raw_hr->{common_config}->{mojo_log_path})->child("$script.log")->to_string;
  	die "No config in $file" if ! $raw_hr;
  	return $return;
 }
