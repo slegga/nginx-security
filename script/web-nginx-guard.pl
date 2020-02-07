@@ -8,8 +8,9 @@ use SH::UseLib;
 use Model::GetCommonConfig;
 my $gcc = Model::GetCommonConfig->new;
 #my $name = fileparse($0,'.pl');
-plugin Config => {default => $gcc->get_hypnotoad_config($0) };
-
+#plugin Config => {toadfarm => $gcc->get_hypnotoad_config($0) };
+app->config($gcc->get_mojoapp_config($0));
+app->config(hypnotoad => $gcc->get_hypnotoad_config($0));
 
 app->sessions->cookie_name('nginx-guard');
 app->sessions->default_expiration( 3600 * 1 );
