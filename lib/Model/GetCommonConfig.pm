@@ -53,7 +53,9 @@ sub get_hypnotoad_config {
  	} else {
  		die "Missing config in file ". $cfile->to_string .":  web_services:->$script:";
  	}
- 	$return->{pid_file} = '/run/user/'.`id -uz`.'/'.$script.'.pid';
+ 	my $uid = `id -u`;
+ 	$uid =~s/[\n\s]//g;
+ 	$return->{pid_file} = "/run/user/$uid/".$script.'.pid';
  	return $return;
 }
 
