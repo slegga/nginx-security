@@ -11,6 +11,9 @@ my $t = Test::Mojo->new(Mojo::File->new('script/web-login.pl'));
 $t->get_ok('/login')->status_is(200);
 $t->post_ok('/login'=>form=>{user => 'marcus',pass => 'lulz'})->status_is(302)->content_is('');
 my $tx = $t->tx;
-$t->get_ok($tx->res->headers->header('Location'));
+$t->get_ok($tx->res->headers->header('Location'))->status_is(200);
+$t->get_ok('/?redirect_uri=/test')->status_is(302);
+$tx = $t->tx;
+is($tx->res->headers->header('Location'),'/test');
 done_testing();
 

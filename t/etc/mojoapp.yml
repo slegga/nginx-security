@@ -5,4 +5,5 @@ common_config:
   mojo_log_path: t/playground
 web_services:
     web-login:
+      accesslogfile: t/playground/login-access.log
     web-login.t:

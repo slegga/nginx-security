@@ -78,7 +78,7 @@ sub landing_page {
 		}
 		return $self->render(text=>'ok');
 	} else {
-		$self->res->status(401);
+		$self->res->code(401);
 		return $self->render(text=>'Not logged in');
 	}
 }
