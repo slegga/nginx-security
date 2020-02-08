@@ -54,6 +54,14 @@ sub startup {
 	my $logged_in = $r->under('/')->to('login#landing_page');
 	$logged_in->any('/')->to('login#landing_page')->name('landing_page')->name('landing_page');
 		$logged_in->get('/index')->to('login#landing_page')->name('landing_page');
+
+
+   $self->helper (is_logged_in => sub {
+        my $c = shift;
+        return 1 if $c->session('user');
+        return;
+   });
+
 }
 
 1;

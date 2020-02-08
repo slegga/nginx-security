@@ -38,19 +38,6 @@ sub login {
 	$self->redirect_to('landing_page');
 }
 
-=head2 logged_in
-
-Return if logged in. Return undef if not.
-
-=cut
-
-sub logged_in {
-  my $self = shift;
-
-  return 1 if $self->session('user');
-#  $self->redirect_to('login');
-  return;
-}
 
 =head2 logout
 
@@ -72,7 +59,7 @@ Landing page.
 
 sub landing_page {
 	my $self = shift;
-	if ($self->logged_in) {
+	if ($self->is_logged_in) {
 		if ($self->param('redirect_uri')) {
 			return $self->redirect_to($self->tx->req->header('X-Original-URI')||$self->param('redirect_uri'));
 		}
