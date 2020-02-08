@@ -58,8 +58,8 @@ sub startup {
    $self->helper (is_logged_in => sub {
         my $c = shift;
         return 1 if $c->session('user');
-		print STDERR "NOT is_logged_in\n".ref $c;
-		print STDERR Dumper $c->session;
+#		print STDERR "NOT is_logged_in\n".ref $c;
+#		print STDERR Dumper $c->session;
         return;
    });
 
