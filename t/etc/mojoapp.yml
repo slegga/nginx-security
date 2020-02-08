@@ -7,3 +7,4 @@ web_services:
     web-login:
       accesslogfile: t/playground/login-access.log
     web-login.t:
+      accesslogfile: t/playground/login-access.log

@@ -1,0 +1,4 @@
+ 127.0.0.1 - Sat Feb  8 15:48:54 2020 "GET /login HTTP/1.1" 200 421 "-" "Mojolicious (Perl)"
+ 127.0.0.1 - Sat Feb  8 15:48:54 2020 "POST /login HTTP/1.1" 302 - "-" "Mojolicious (Perl)"
+ 127.0.0.1 - Sat Feb  8 15:48:54 2020 "GET / HTTP/1.1" 401 13 "-" "Mojolicious (Perl)"
+ 127.0.0.1 - Sat Feb  8 15:48:54 2020 "GET /?redirect_uri=/test HTTP/1.1" 401 13 "-" "Mojolicious (Perl)"
