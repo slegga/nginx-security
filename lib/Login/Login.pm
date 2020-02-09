@@ -20,7 +20,7 @@ sub login {
 	my $self = shift;
 	my $user = $self->param('user') || '';
 	my $pass = $self->param('pass') || '';
-	$DB::single=2;
+#	$DB::single=2;
 	if($self->is_logged_in) {
 		return $self->redirect_to($self->tx->req->header('X-Original-URI')||'landing_page');
 	}
@@ -35,7 +35,7 @@ sub login {
 	$self->session(user => $user);
 
 	$self->flash(message => 'Thanks for logging in.');
-	$self->redirect_to('landing_page');
+	$self->redirect_to('/'.$self->param('base'));
 }
 
 
@@ -46,9 +46,9 @@ Log out user.
 =cut
 
 sub logout {
-  my $self = shift;
-  $self->session(expires => 1);
-  $self->redirect_to('login');
+	my $self = shift;
+	$self->session(expires => 1);
+	return	$self->redirect_to('/'.$self->param('base').'/login');
 }
 
 =head2 landing_page
@@ -66,7 +66,7 @@ sub landing_page {
 		return $self->render(text=>'ok');
 	} else {
 #	print STDERR "Not is_logged_in\n";
-		return  $self->redirect_to('login');
+	return	$self->redirect_to('/'.$self->param('base').'/login');
 	}
 }
 1;

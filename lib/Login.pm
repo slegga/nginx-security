@@ -48,11 +48,10 @@ sub startup {
 	$self->helper(users  => sub { state $users = MyApp::Model::Users->new });
 
 	my $r = $self->routes;
-	$r->any('/login')->to('login#login')->name('login');
-	$r->get('/logout')->to('login#logout');
-	my $logged_in = $r->under('/')->to('login#landing_page');
-	$logged_in->any('/')->to('login#landing_page')->name('landing_page')->name('landing_page');
-		$logged_in->get('/index')->to('login#landing_page')->name('landing_page');
+	$r->any('/:base/login')->to('login#login')->name('login');
+	$r->get('/:base/logout')->to('login#logout');
+	$r->any('/:base/')->to('login#landing_page')->name('landing_page')->name('landing_page');
+	$r->get('/:base/index')->to('login#landing_page')->name('landing_page');
 
 
    $self->helper (is_logged_in => sub {
