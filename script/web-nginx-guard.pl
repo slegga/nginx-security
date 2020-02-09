@@ -6,6 +6,7 @@ use FindBin;
 use lib "$FindBin::Bin/../../utilities-perl/lib";
 use SH::UseLib;
 use Model::GetCommonConfig;
+use Data::Dumper;
 my $gcc = Model::GetCommonConfig->new;
 #my $name = fileparse($0,'.pl');
 #plugin Config => {toadfarm => $gcc->get_hypnotoad_config($0) };
@@ -56,7 +57,7 @@ get '/' => sub {
 		}
 		else {
 	        $c->session( expires => ( $c->session('nms_expires') || time + 3600 ) );
-	        $c->app->log->debug("[$username] No username in session.");
+	        $c->app->log->warn("[$username] No username in session.". Dumper $c->session);
 	        $c->render( text => 'Use 401 instead of 302 for redirect in nginx', status => 401 );
 	    }
     }
