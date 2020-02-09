@@ -66,8 +66,7 @@ sub landing_page {
 		return $self->render(text=>'ok');
 	} else {
 #	print STDERR "Not is_logged_in\n";
-		$self->res->code(403);
-		return $self->render(text=>'Not logged in');
+		return  $self->redirect_to('login');
 	}
 }
 1;
