@@ -5,7 +5,7 @@ use FindBin;
 use lib "$FindBin::Bin/../../utilities-perl/lib";
 use SH::UseLib;
 use Model::GetCommonConfig;
-
+use Mojo::JWT;
 use MyApp::Model::Users;
 use Data::Dumper;
 
@@ -42,6 +42,7 @@ sub startup {
 	push @{$self->static->paths}, $self->home->rel_file('static');
 	$self->sessions->default_expiration( 3600 * 1 );
 	$self->sessions->secure( $ENV{TEST_INSECURE_COOKIES} ? 0 : 1 );
+	$self->sessions->cookie_name( $config->{moniker} );
 
 	$self->plugin('MyApp::Plugin::Logger');
 	$self->secrets($config->{secrets});
