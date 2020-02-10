@@ -23,22 +23,22 @@ get '/' => sub {
 	my $c = shift;
 	$c->render(status=>200, text => 'Allowed');
 	my $uri      = Mojo::URL->new( $c->req->headers->header('X-Original-URI') || '' );
-	my $username = $c->session('username');
-    $username ||= 'anonymous';
+	my $user = $c->session('user');
+    $user ||= 'anonymous';
 
     if ( !$uri or !defined $uri->scheme or $uri->scheme ne 'https' ) {
 
         # X-Original-URI is set by nginx
         # The guard require https to prevent man-in-the-middle cookie stealing
-        $c->app->log->error("[$username] nginx is not configured correctly: X-Original-URI is invalid. ($uri)");
+        $c->app->log->error("[$user] nginx is not configured correctly: X-Original-URI is invalid. ($uri)");
         $c->render( text => 'nginx is not configured.', status => 500 );
     }
-	elsif ( $c->session('username') ) {
-	        $c->req->env->{identity} = $c->session('username');
+	elsif ( $c->session('user') ) {
+	        $c->req->env->{identity} = $c->session('user');
 	        if ( $uri =~ m!/logout\b! ) {
 	            $c->session( expires => 1, nms_expires => 1 );
 	        }
-	        $c->res->headers->header( 'X-User', $c->session('username') );
+	        $c->res->headers->header( 'X-User', $c->session('user') );
 	        $c->render( text => 'Logged in', status => 200 );
 		}
 	else {
@@ -47,17 +47,17 @@ get '/' => sub {
 		$user = $headers->header('X-Common-Name') if ($headers);
 
 		if ( $user ) {
-			$c->session->{username} = $user;
+			$c->session->{user} = $user;
 	        $c->req->env->{identity} = $user;
 	        if ( $uri =~ m!/logout\b! ) {
 	            $c->session( expires => 1, nms_expires => 1 );
 	        }
-	        $c->res->headers->header( 'X-User', $c->session('username') );
+	        $c->res->headers->header( 'X-User', $c->session('user') );
 	        $c->render( text => 'Logged in', status => 200 );
 		}
 		else {
 	        $c->session( expires => ( $c->session('nms_expires') || time + 3600 ) );
-	        $c->app->log->warn("[$username] No username in session.". Dumper $c->session);
+	        $c->app->log->warn("[$user] No user in session.". Dumper $c->session);
 	        $c->app->log->warn("Recest Headers: ". $c->req->headers->to_string);
    	        $c->render( text => 'Use 401 instead of 302 for redirect in nginx', status => 401 );
 	    }
