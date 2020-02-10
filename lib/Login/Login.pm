@@ -30,7 +30,7 @@ sub login {
 	}
 	$self->app->log->info("$user tries to log in");
 	if(! $self->users->check($user, $pass) ) {
-		$self->app->log->warn("Cookie mojolicious: ". ($self->cookie('mojolicious'//'__UNDEF__')));
+		$self->app->log->warn("Cookie mojolicious: ". ($self->cookie('mojolicious')//'__UNDEF__'));
 		$self->app->log->info("$user is NOT logged in");
 		return $self->render;
 	}
