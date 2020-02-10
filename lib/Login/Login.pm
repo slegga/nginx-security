@@ -22,20 +22,32 @@ sub login {
 	my $pass = $self->param('pass') || '';
 #	$DB::single=2;
 	if($self->is_logged_in) {
-		return $self->redirect_to($self->tx->req->header('X-Original-URI')||'landing_page');
+		if (my $redirect = $self->tx->req->headers->header('X-Original-URI') || $self->param('redirect_uri')) {
+			return $self->redirect_to($redirect);
+		} else {
+			return $self->render('landing_page');
+		}
 	}
 	$self->app->log->info("$user tries to log in");
 	if(! $self->users->check($user, $pass) ) {
+		$self->app->log->warn("Cookie mojolicious: ". $self->cookie('mojolicious'));
 		$self->app->log->info("$user is NOT logged in");
-		return $self->render
+		return $self->render;
 	}
 
-	$self->app->log->info("$user is logged in");
+	$self->app->log->info("$user logs in");
 
 	$self->session(user => $user);
+	if(	my $m = $self->cookie('mojolicious') ) {
+		$self->app->log->warn("Success Cookie mojolicious: ". $m);
+	}
 
-	$self->flash(message => 'Thanks for logging in.');
-	$self->redirect_to('/'.$self->param('base'));
+	if (my $redirect = $self->tx->req->headers->header('X-Original-URI') || $self->param('redirect_uri')) {
+		return $self->redirect_to($redirect);
+	}
+	$self->app->log->warn('Render landing for '.$self->session->{user});
+	return $self->render('login/landing_page');
+
 }
 
 
