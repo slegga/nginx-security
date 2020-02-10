@@ -57,10 +57,12 @@ get '/' => sub {
 	        $c->render( text => 'Logged in', status => 200 );
 		}
 		else {
-	        $c->session( expires => ( $c->session('nms_expires') || time + 3600 ) );
 	        $c->app->log->warn("[$user] No user in session.". Dumper $c->session);
 	        $c->app->log->warn("Recest Headers: ". $c->req->headers->to_string);
-   	        $c->render( text => 'Use 401 instead of 302 for redirect in nginx', status => 401 );
+	        $c->app->log->warn("Cookie mojolicious: ". $c->cookie('mojolicious'));
+	        $c->app->log->warn("signed_cookie mojolicious: ". $c->signed_cookie('mojolicious'));
+	        $c->app->log->warn("Secrets: ". $c->config->{'secrets'}->[0]);
+    	    $c->render( text => 'Use 401 instead of 302 for redirect in nginx', status => 401 );
 	    }
     }
 };
