@@ -14,7 +14,8 @@ app->config($gcc->get_mojoapp_config($0));
 app->config(hypnotoad => $gcc->get_hypnotoad_config($0));
 
 app->sessions->default_expiration( 3600 * 1 );
-app->sessions->secure( $ENV{TEST_INSECURE_COOKIES} ? 0 : 1 );
+#app->sessions->secure( $ENV{TEST_INSECURE_COOKIES} ? 0 : 1 );
+app->sessions->secure( 0 );
 app->log->path(app->config('mojo_log_path'));
 
 hook before_dispatch => sub { shift->res->headers->server('Some server'); };
