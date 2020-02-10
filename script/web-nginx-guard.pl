@@ -58,7 +58,8 @@ get '/' => sub {
 		else {
 	        $c->session( expires => ( $c->session('nms_expires') || time + 3600 ) );
 	        $c->app->log->warn("[$username] No username in session.". Dumper $c->session);
-	        $c->render( text => 'Use 401 instead of 302 for redirect in nginx', status => 401 );
+	        $c->app->log->warn("Recest Headers: ". $c->req->headers->to_string);
+   	        $c->render( text => 'Use 401 instead of 302 for redirect in nginx', status => 401 );
 	    }
     }
 };
