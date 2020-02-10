@@ -59,25 +59,9 @@ Log out user.
 sub logout {
 	my $self = shift;
 	$self->session(expires => 1);
-	return	$self->redirect_to('/'.$self->param('base').'/login');
+	return	$self->redirect_to('/'.$self->param('base').'/');
 }
 
-=head2 landing_page
 
-Landing page.
 
-=cut
-
-sub landing_page {
-	my $self = shift;
-	if ($self->is_logged_in) {
-		if ($self->param('redirect_uri')) {
-			return $self->redirect_to($self->tx->req->headers->header('X-Original-URI')||$self->param('redirect_uri'));
-		}
-		return $self->render(text=>'ok');
-	} else {
-#	print STDERR "Not is_logged_in\n";
-	return	$self->redirect_to('/'.$self->param('base').'/login');
-	}
-}
 1;
