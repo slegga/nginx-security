@@ -47,7 +47,7 @@ get '/' => sub {
 		if (my $jwt = $c->cookie('sso-jwt-token') ) {
 			my $claims;
 			eval {
-				my $claims = Mojo::JWT->new(secret => $c->config->secrets->[0])->decode($jwt);
+				my $claims = Mojo::JWT->new(secret => $c->config->{secrets}->[0])->decode($jwt);
 			} or $c->app->log->error('Did not manage to validate jwt "'.$jwt.'" '.$!.' '.$@. "secret: ". $c->config->secrets->[0]);
 			if ($claims) {
 				$c->app->log->info('claims is '.j($claims));
