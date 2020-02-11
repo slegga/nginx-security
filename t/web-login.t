@@ -9,7 +9,7 @@ $ENV{COMMON_CONFIG_DIR} ='t/etc';
 $ENV{MOJO_CONFIG} = 't/etc/mojo.conf';
 $ENV{TEST_INSECURE_COOKIES}=1;
 my $t = Test::Mojo->new(Mojo::File->new('script/web-login.pl'));
-#$t->ua->tx->req->headers('X-Original-URI' => 'https://baedi.no');
+$t->ua->tx->req->headers('X-Original-URI' => 'https://baedi.no');
 $t->get_ok('/x/')->status_is(200);
 $t->post_ok('/x/'=>form=>{user => 'marcus',pass => 'lulz'})->status_is(200)->content_like(qr'Welcome');
 my $tx = $t->tx;

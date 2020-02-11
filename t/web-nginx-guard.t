@@ -8,15 +8,20 @@ use lib '.';
 $ENV{COMMON_CONFIG_DIR} ='t/etc';
 my $secret = 'abc';
 my $t = Test::Mojo->new(Mojo::File->new('script/web-nginx-guard.pl'));
-#$t->ua->tx->req->headers('X-Original-URI' => 'https://baedi.no');
-my $tx = $t->ua->build_tx(GET => 'https://example.com/account');
-$t->get_ok('/')->status_is(401);
+is($t->app->secrets->[0], $secret);
 my $jwt = Mojo::JWT->new(claims=>{user=>'adoer',expires => time + 60},secret=>$secret)->encode;
-$t->ua->on(start => sub {
-  my ($ua, $tx) = @_;
-  $tx->req->cookie('sso-jwt-token' => $jwt);
-});
-$t->get_ok('/')->status_is(200);
+
+$t->get_ok('/')->status_is(401);
+
+# Request with custom cookie
+my $tx = $t->ua->build_tx(GET => '/');
+$tx->req->cookies({name=>'sso-jwt-token', value=> $jwt});
+$tx->req->headers->header('X-Original-URI' => '/spennendesaker');
+$t->request_ok($tx)->status_is(200)->content_is('ok');
+
+#$t->tx->req->cookie('X-Original-URI' => '/spennendesaker');
+#$t->tx->req->cookie();
+#$t->get_ok('/')->status_is(200);
 
 done_testing();
 

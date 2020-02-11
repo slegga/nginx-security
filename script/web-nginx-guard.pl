@@ -15,23 +15,25 @@ my $gcc = Model::GetCommonConfig->new;
 #plugin Config => {toadfarm => $gcc->get_hypnotoad_config($0) };
 app->config($gcc->get_mojoapp_config($0));
 app->config(hypnotoad => $gcc->get_hypnotoad_config($0));
-
+app->secrets(app->config->{secrets});
 app->sessions->default_expiration( 3600 * 1 );
 app->sessions->secure( $ENV{TEST_INSECURE_COOKIES} ? 0 : 1 );
 app->sessions->secure( 0 );
 app->sessions->cookie_name(app->config->{moniker});
-app->log->path(app->config('mojo_log_path'));
-
+if (! $ENV{TEST_INSECURE_COOKIES}) {
+	app->log->path(app->config('mojo_log_path'));
+} else {
+	app->log->handle(*STDERR);
+}
 hook before_dispatch => sub { shift->res->headers->server('Some server'); };
 
 get '/' => sub {
 	my $c = shift;
 	$c->render(status=>200, text => 'Allowed');
 	my $headers = $c->tx->req->headers;
-	my $uri      = Mojo::URL->new( $headers->header('X-Original-URI') || '' );
+	my $uri      = Mojo::URL->new( $headers->header('X-Original-URI')||'');
 
     if ( !$uri or !defined $uri->scheme or $uri->scheme ne 'https' ) {
-
         # X-Original-URI is set by nginx
         # The guard require https to prevent man-in-the-middle cookie stealing
         $c->app->log->error("nginx is not configured correctly: X-Original-URI is invalid. ($uri)");
@@ -47,16 +49,19 @@ get '/' => sub {
 		if (my $jwt = $c->cookie('sso-jwt-token') ) {
 			my $claims;
 			eval {
-				my $claims = Mojo::JWT->new(secret => $c->config->{secrets}->[0])->decode($jwt);
-			} or $c->app->log->error('Did not manage to validate jwt "'.$jwt.'" '.$!.' '.$@. "secret: ". $c->config->secrets->[0]);
+				my $claims = Mojo::JWT->new(secret => $c->app->secrets->[0])->decode($jwt);
+			} or $c->app->log->error('Did not manage to validate jwt "'.$jwt.'" '.$!.' '.$@. "secret: ". $c->app->secrets->[0]);
 			if ($claims) {
 				$c->app->log->info('claims is '.j($claims));
 				$user = $claims->{user};
 				$c->tx->res->cookie('sso-jwt-token'=>'');
 			} else {
+				say STDERR 'Got jwt but no claims jwt:'. $jwt;
+				say STDERR "secret: ".$c->app->secrets->[0];
 				$c->app->log->warn( 'Got jwt but no claims jwt:'. $jwt);
 			}
 		} else {
+			say STDERR "NO JWT:\n".$headers->to_string;
 			$c->app->log->warn( 'No jwt cookie');
 		}
 	}
