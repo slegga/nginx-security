@@ -53,7 +53,11 @@ get '/' => sub {
 				$c->app->log->info('claims is '.j($claims));
 				$user = $claims->{user};
 				$c->tx->res->cookie('sso-jwt-token'=>'');
+			} or {
+				$c->app->log->warn( 'Got jwt but no claims jwt:'. $jwt);
 			}
+		} else {
+			$c->app->log->warn( 'No jwt cookie');
 		}
 	}
     $c->req->env->{identity} = $user;
@@ -70,10 +74,9 @@ get '/' => sub {
         $c->res->headers->header( 'X-User', $user );
         return $c->render( text => 'Logged in', status => 200 );
 	}
-    $c->app->log->warn(" No user in session.". Dumper $c->session);
-    $c->app->log->warn("Recest Headers: ". $c->req->headers->to_string);
-    $c->app->log->warn("Cookie mojolicious: ". ($c->cookie('mojolicious')//'__UNDEF__'));
-    $c->app->log->warn("signed_cookie mojolicious: ". ($c->signed_cookie('mojolicious')//'__UNDEF__'));
+    $c->app->log->warn("Not authenticated.");
+    $c->app->log->warn("Reqest Headers:\n". $c->req->headers->to_string);
+    $c->app->log->warn("Cookie sso-jwt-token: ". ($c->cookie('sso-jwt-token')//'__UNDEF__'));
     $c->app->log->warn("Secrets: ". $c->config->{'secrets'}->[0]);
     $c->render( text => 'Use 401 instead of 302 for redirect in nginx', status => 401 );
 
