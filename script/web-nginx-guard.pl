@@ -48,7 +48,7 @@ get '/' => sub {
 			my $claims;
 			eval {
 				my $claims = Mojo::JWT->new(secret => $c->app->secrets->[0])->decode($jwt);
-			} or $c->app->log->error('Did not manage to validate jwt "$jwt" '.$!.' '.$@);
+			} or $c->app->log->error('Did not manage to validate jwt "'.$jwt.'" '.$!.' '.$@. "secret: ". $c->app->secrets->[0]);
 			if ($claims) {
 				$c->app->log->info('claims is '.j($claims));
 				$user = $claims->{user};
