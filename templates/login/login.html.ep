@@ -1,5 +1,5 @@
 % layout 'login';
-%= form_for login => begin
+%= form_for login => (method =>'POST') => begin
   % if (param 'user') {
     <b>Wrong name or password, please try again.</b><br>
   % }
