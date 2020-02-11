@@ -30,7 +30,7 @@ sub login {
 	}
 	$self->app->log->info("$user tries to log in");
 	if(! $self->users->check($user, $pass) ) {
-		$self->app->log->warn("Cookie mojolicious: ". $self->cookie('mojolicious'));
+		$self->app->log->warn("Cookie mojolicious: ". ($self->cookie('mojolicious')//'__UNDEF__'));
 		$self->app->log->info("$user is NOT logged in");
 		return $self->render;
 	}
@@ -38,9 +38,8 @@ sub login {
 	$self->app->log->info("$user logs in");
 
 	$self->session(user => $user);
-	if(	my $m = $self->cookie('mojolicious') ) {
-		$self->app->log->warn("Success Cookie mojolicious: ". $m);
-	}
+	my $jwt = Mojo::JWT->new(claims => {user=>$user}, secret => $self->app->secrets->[0])->encode;
+	$self->res->headers->header('X-JWT', $jwt);
 
 	if (my $redirect = $self->tx->req->headers->header('X-Original-URI') || $self->param('redirect_uri')) {
 		return $self->redirect_to($redirect);
@@ -60,25 +59,9 @@ Log out user.
 sub logout {
 	my $self = shift;
 	$self->session(expires => 1);
-	return	$self->redirect_to('/'.$self->param('base').'/login');
+	return	$self->redirect_to('/'.$self->param('base').'/');
 }
 
-=head2 landing_page
 
-Landing page.
 
-=cut
-
-sub landing_page {
-	my $self = shift;
-	if ($self->is_logged_in) {
-		if ($self->param('redirect_uri')) {
-			return $self->redirect_to($self->tx->req->headers->header('X-Original-URI')||$self->param('redirect_uri'));
-		}
-		return $self->render(text=>'ok');
-	} else {
-#	print STDERR "Not is_logged_in\n";
-	return	$self->redirect_to('/'.$self->param('base').'/login');
-	}
-}
 1;

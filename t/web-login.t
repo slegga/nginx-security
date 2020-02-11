@@ -17,5 +17,6 @@ my $tx = $t->tx;
 $t->get_ok('/x/?redirect_uri=/test')->status_is(302);
 $tx = $t->tx;
 is($tx->res->headers->header('Location'),'/test');
+$t->get_ok('/xlogin/?redirect_uri=https://piano.0x.no/test')->status_is(302);
 done_testing();
 

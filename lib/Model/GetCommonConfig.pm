@@ -70,20 +70,21 @@ Return app config from common config file
 sub get_mojoapp_config {
     my $self = shift;
     die "Not an object $self" if !ref $self;
-    my $script = basename(shift,'.pl');
+    my $moniker = basename(shift,'.pl');
     my $file = $self->config_dir->child('mojoapp.yml')->to_string;
     die "Common config file $file does not exists" if ! -e $file;
  	my $raw_hr =  YAML::Tiny->read( $file)->[0];
  	my $return;
  	$return = $raw_hr->{common_config};
     die "Missing mojo_log_path in common_config file $file" if ! exists $return->{mojo_log_path};
- 	if (exists $raw_hr->{web_services}->{$script}) {
-		my $tmp = $raw_hr->{web_services}->{$script};
+ 	if (exists $raw_hr->{web_services}->{$moniker}) {
+		my $tmp = $raw_hr->{web_services}->{$moniker};
 		for my $key(keys %$tmp) {
 			$return->{$key} = $tmp->{$key};
 		}
  	}
-	$return->{mojo_log_path} = path($raw_hr->{common_config}->{mojo_log_path})->child("$script.log")->to_string;
+	$return->{moniker}       = $moniker;
+	$return->{mojo_log_path} = path($raw_hr->{common_config}->{mojo_log_path})->child("$moniker.log")->to_string;
  	die "No config in $file" if ! $raw_hr;
  	return $return;
 }

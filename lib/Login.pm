@@ -5,7 +5,7 @@ use FindBin;
 use lib "$FindBin::Bin/../../utilities-perl/lib";
 use SH::UseLib;
 use Model::GetCommonConfig;
-
+use Mojo::JWT;
 use MyApp::Model::Users;
 use Data::Dumper;
 
@@ -43,13 +43,13 @@ sub startup {
 	push @{$self->static->paths}, $self->home->rel_file('static');
 	$self->sessions->default_expiration( 3600 * 1 );
 	$self->sessions->secure( $ENV{TEST_INSECURE_COOKIES} ? 0 : 1 );
+	$self->sessions->cookie_name( $config->{moniker} );
 
 	$self->plugin('MyApp::Plugin::Logger');
 	$self->secrets($config->{secrets});
 	$self->helper(users  => sub { state $users = MyApp::Model::Users->new });
 
 	my $r = $self->routes;
-#	$r->any('/:base/login')->to('login#login')->name('login');
 	$r->get('/:base/logout')->to('login#logout');
 	$r->any('/:base/')->to('login#login')->name('landing_page')->name('landing_page');
 
@@ -57,8 +57,6 @@ sub startup {
    $self->helper (is_logged_in => sub {
         my $c = shift;
         return 1 if $c->session->{user};
-#		print STDERR "NOT is_logged_in\n".ref $c;
-#		print STDERR Dumper $c->session;
 		app->log->info('No none is logged in:  '. $c->req->headers->to_string));
         return;
    });
