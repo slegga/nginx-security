@@ -51,7 +51,7 @@ sub startup {
 
 	my $r = $self->routes;
 	$r->get('/:base/logout')->to('login#logout');
-	$r->any('/:base/')->to('login#login')->name('landing_page')->name('landing_page');
+	$r->any('/:base/')->to('login#login')->name('landing_page');
 
 
    $self->helper (is_logged_in => sub {
