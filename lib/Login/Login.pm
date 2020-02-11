@@ -30,6 +30,10 @@ sub login {
 	my $user = $self->param('user') || '';
 	my $pass = $self->param('pass') || '';
 
+	if (my $redirect = $self->tx->req->headers->header('X-Original-URI') || $self->param('redirect_uri')) {
+		$self->session(redirect_to => $redirect);
+	}
+
 	$self->app->log->info("$user tries to log in");
 	if(! $self->users->check($user, $pass) ) {
 		$self->app->log->warn("Cookie mojolicious: ". ($self->cookie('mojolicious')//'__UNDEF__'));
@@ -44,7 +48,8 @@ sub login {
 	my $jwt = Mojo::JWT->new(claims => {user=>$user}, secret => $self->app->secrets->[0])->encode;
 	$self->cookie('sso-jwt-token', $jwt,{expires => time + 60,secure => !!$ENV{TEST_INSECURE_COOKIES}});
 
-	if (my $redirect = $self->tx->req->headers->header('X-Original-URI') || $self->param('redirect_uri')) {
+	if (my $redirect = $self->session('redirect_to')) {
+		$self->session('redirect_to' => undef); # remove redirect for later reloging
 		return $self->redirect_to($redirect);
 	}
 	$self->session(message => '');
