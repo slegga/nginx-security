@@ -53,7 +53,7 @@ get '/' => sub {
 				$c->app->log->info('claims is '.j($claims));
 				$user = $claims->{user};
 				$c->tx->res->cookie('sso-jwt-token'=>'');
-			} or {
+			} else {
 				$c->app->log->warn( 'Got jwt but no claims jwt:'. $jwt);
 			}
 		} else {
