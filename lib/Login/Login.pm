@@ -45,12 +45,7 @@ sub login {
 	$self->app->log->info("$user logs in");
 
 	$self->session(user => $user);
-	warn" får ikke tak i $self->config. Lag helper i lib/Login.pm som når config og setter cookien";
-	...; # $self->set_jwt_cookie
-	#start flytting
-	my $jwt = Mojo::JWT->new(claims => {user=>$user}, secret => $self->app->config('secrets')->[0])->encode;
-	$self->cookie('sso-jwt-token', $jwt,{expires => time + 60,secure => $ENV{TEST_INSECURE_COOKIES} ? 0 : 1, path =>'/' });
-	#slutt flytting
+	$self->set_jwt_cookie({user=> $user, expires => time +60 });
 	if (my $redirect = $self->session('redirect_to')) {
 		$self->session('redirect_to' => undef); # remove redirect for later reloging
 		return $self->redirect_to($redirect);
