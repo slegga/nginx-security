@@ -46,7 +46,7 @@ sub login {
 
 	$self->session(user => $user);
 	my $jwt = Mojo::JWT->new(claims => {user=>$user}, secret => $self->app->secrets->[0])->encode;
-	$self->cookie('sso-jwt-token', $jwt,{expires => time + 60,secure => !!$ENV{TEST_INSECURE_COOKIES}});
+	$self->cookie('sso-jwt-token', $jwt,{expires => time + 60,secure => $ENV{TEST_INSECURE_COOKIES} ? 0 : 1, path =>'/' });
 
 	if (my $redirect = $self->session('redirect_to')) {
 		$self->session('redirect_to' => undef); # remove redirect for later reloging

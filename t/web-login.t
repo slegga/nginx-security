@@ -18,5 +18,6 @@ $t->get_ok('/x/?redirect_uri=/test')->status_is(200);
 $t->post_ok('/x/?redirect_uri=/test'=>form=>{user => 'marcus',pass => 'lulz'})->status_is(302)->content_is('');
 $tx = $t->tx;
 is($tx->res->headers->header('Location'),'/test');
+like($tx->res->cookie('sso-jwt-token'),qr'sso-jwt-token.+path=\/') ;
 done_testing();
 
