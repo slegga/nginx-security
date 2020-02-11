@@ -52,6 +52,7 @@ sub startup {
 	my $r = $self->routes;
 	$r->get('/:base/logout')->to('login#logout');
 	$r->any('/:base/')->to('login#login')->name('landing_page');
+	$r->any('/:base/login')->to('login#login')->name('landing_page'); # because of login form
 
 
    $self->helper (is_logged_in => sub {
