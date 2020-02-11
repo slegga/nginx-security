@@ -14,9 +14,9 @@ $t->get_ok('/x/')->status_is(200);
 $t->post_ok('/x/'=>form=>{user => 'marcus',pass => 'lulz'})->status_is(200)->content_like(qr'Welcome');
 my $tx = $t->tx;
 #print STDERR Dumper $tx;
-$t->get_ok('/x/?redirect_uri=/test')->status_is(302);
+$t->get_ok('/x/?redirect_uri=/test')->status_is(200);
+$t->post_ok('/x/?redirect_uri=/test'=>form=>{user => 'marcus',pass => 'lulz'})->status_is(302)->content_is('');
 $tx = $t->tx;
 is($tx->res->headers->header('Location'),'/test');
-$t->get_ok('/xlogin/?redirect_uri=https://piano.0x.no/test')->status_is(302);
 done_testing();
 

@@ -8,6 +8,7 @@ use SH::UseLib;
 use Model::GetCommonConfig;
 use Data::Dumper;
 use Mojo::JWT;
+use Mojo::JSON 'j';
 
 my $gcc = Model::GetCommonConfig->new;
 #my $name = fileparse($0,'.pl');
@@ -43,12 +44,14 @@ get '/' => sub {
 		$user = $headers->header('X-Common-Name');
 	}
 	if (!$user) {
-		if (my $jwt = $c->req->headers->header('X-JWT') ) {
+		if (my $jwt = $c->cookie('sso-jwt-token') ) {
 			my $claims = Mojo::JWT->new(secret => $c->app->secrets->[0])->decode($jwt);
+			$c->app->log->info('claims is '.j($claims));
 			$user = $claims->{user};
+			$c->tx->res->cookie('sso-jwt-token'=>'');
 		}
 	}
-    $c->req->env->{identity} = $c->session('user');
+    $c->req->env->{identity} = $user;
 
     #HANDLE USER SET
 	if ( $user ) {

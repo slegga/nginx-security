@@ -39,7 +39,7 @@ sub startup {
 	$self->plugin('Mojolicious::Plugin::AccessLog' => {log => $config->{'accesslogfile'},
 		format => ' %h %u %{%c}t "%r" %>s %b "%{Referer}i" "%{User-Agent}i"'});
 	$self->log->path($config->{mojo_log_path});
-	app->log->info('(Re)Start server'));
+	$self->log->info('(Re)Start server');
 	push @{$self->static->paths}, $self->home->rel_file('static');
 	$self->sessions->default_expiration( 3600 * 1 );
 	$self->sessions->secure( $ENV{TEST_INSECURE_COOKIES} ? 0 : 1 );
@@ -57,7 +57,7 @@ sub startup {
    $self->helper (is_logged_in => sub {
         my $c = shift;
         return 1 if $c->session->{user};
-		app->log->info('No none is logged in:  '. $c->req->headers->to_string));
+		$self->log->info('No none is logged in:  '. $c->req->headers->to_string);
         return;
    });
 
