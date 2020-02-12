@@ -17,7 +17,7 @@ $t->get_ok('/')->status_is(401);
 my $tx = $t->ua->build_tx(GET => '/');
 $tx->req->cookies({name=>'sso-jwt-token', value=> $jwt});
 $tx->req->headers->header('X-Original-URI' => '/spennendesaker');
-$t->request_ok($tx)->status_is(200)->content_is('ok');
+$t->request_ok($tx)->status_is(200)->content_is('Logged in');
 
 #$t->tx->req->cookie('X-Original-URI' => '/spennendesaker');
 #$t->tx->req->cookie();

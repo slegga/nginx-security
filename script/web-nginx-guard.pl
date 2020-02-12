@@ -20,6 +20,8 @@ app->sessions->default_expiration( 3600 * 1 );
 app->sessions->secure( $ENV{TEST_INSECURE_COOKIES} ? 0 : 1 );
 app->sessions->secure( 0 );
 app->sessions->cookie_name(app->config->{moniker});
+my $secret = app->secrets->[0];
+$DB::single=2;
 if (! $ENV{TEST_INSECURE_COOKIES}) {
 	app->log->path(app->config('mojo_log_path'));
 } else {
@@ -49,15 +51,15 @@ get '/' => sub {
 		if (my $jwt = $c->cookie('sso-jwt-token') ) {
 			my $claims;
 			eval {
-				my $claims = Mojo::JWT->new(secret => $c->app->secrets->[0])->decode($jwt);
-			} or $c->app->log->error('Did not manage to validate jwt "'.$jwt.'" '.$!.' '.$@. "secret: ". $c->app->secrets->[0]);
+				$claims = Mojo::JWT->new(secret => $secret)->decode($jwt);
+			} or $c->app->log->error('Did not manage to validate jwt "'.$jwt.'" '.$!.' '.$@. "secret: ". $secret);
 			if ($claims) {
 				$c->app->log->info('claims is '.j($claims));
 				$user = $claims->{user};
 				$c->tx->res->cookie('sso-jwt-token'=>'');
 			} else {
 				say STDERR 'Got jwt but no claims jwt:'. $jwt;
-				say STDERR "secret: ".$c->app->secrets->[0];
+#				say STDERR "secret: ".$c->app->secrets->[0];
 				$c->app->log->warn( 'Got jwt but no claims jwt:'. $jwt);
 			}
 		} else {
@@ -82,7 +84,7 @@ get '/' => sub {
     $c->app->log->warn("Not authenticated.");
     $c->app->log->warn("Reqest Headers:\n". $c->req->headers->to_string);
     $c->app->log->warn("Cookie sso-jwt-token: ". ($c->cookie('sso-jwt-token')//'__UNDEF__'));
-    $c->app->log->warn("Secrets: ". $c->config->{'secrets'}->[0]);
+#    $c->app->log->warn("Secrets: ". $c->config->{'secrets'}->[0]);
     $c->render( text => 'Use 401 instead of 302 for redirect in nginx', status => 401 );
 
 };
