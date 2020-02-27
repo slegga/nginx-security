@@ -56,7 +56,11 @@ sub get_hypnotoad_config {
  	my $uid = `id -u`;
  	$uid =~s/[\n\s]//g;
 # 	$return->{pid_file} = "/run/user/$uid/".$script.'.pid'; #does not work well on centos7
-	$return->{pid_file} = "/var/run/".$script.'.pid';
+	my $rundir = path($ENV{HOME})->child('run');
+	if (! -d $rundir) {
+		$rundir->make_path;
+	}
+	$return->{pid_file} = $rundir->child("$script.pid")->to_string;
  	return $return;
 }
 
