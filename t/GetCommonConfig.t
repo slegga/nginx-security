@@ -12,5 +12,5 @@ use Model::GetCommonConfig;
 unlike(path('lib/Model/GetCommonConfig.pm')->slurp, qr{\<[A-Z]+\>},'All placeholders are changed');
 my $m  = Model::GetCommonConfig->new(config_dir =>path('t/etc') );
 is($m->get_hypnotoad_config($0)->{listen}->[0], 'http://127.0.0.1:42');
-like($m->get_hypnotoad_config($0)->{pid_file}, qr'/run/user/\d+/GetCommonConfig\.t\.pid');
+like($m->get_hypnotoad_config($0)->{pid_file}, qr'/var/run/GetCommonConfig\.t\.pid');
 done_testing;
