@@ -31,7 +31,7 @@ hook before_dispatch => sub { shift->res->headers->server('Some server'); };
 
 get '/' => sub {
 	my $c = shift;
-	$c->render(status=>200, text => 'Allowed');
+#	$c->render(status=>200, text => 'Allowed');
 	my $headers = $c->tx->req->headers;
 	my $uri      = Mojo::URL->new( $headers->header('X-Original-URI')||'');
 
@@ -85,7 +85,7 @@ get '/' => sub {
     $c->app->log->warn("Reqest Headers:\n". $c->req->headers->to_string);
     $c->app->log->warn("Cookie sso-jwt-token: ". ($c->cookie('sso-jwt-token')//'__UNDEF__'));
 #    $c->app->log->warn("Secrets: ". $c->config->{'secrets'}->[0]);
-    $c->render( text => 'Use 401 instead of 302 for redirect in nginx', status => 401 );
+    return $c->render( text => 'Use 401 instead of 302 for redirect in nginx', status => 401 );
 
 };
 
