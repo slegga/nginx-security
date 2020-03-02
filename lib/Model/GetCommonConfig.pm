@@ -17,6 +17,10 @@ Give config for script.
 
 Reads config from config directory set in COMMON_CONFIG_DIR else goes to ~/etc
 
+=head1 ENVIRONMENTS VARIABLES
+
+COMMON_CONFIG_DIR = dir to where configuration files are.
+
 =head1 ATTRIBUTES
 
 =head2 config_dir
@@ -79,9 +83,10 @@ sub get_mojoapp_config {
     my $file = $self->config_dir->child('mojoapp.yml')->to_string;
     die "Common config file $file does not exists" if ! -e $file;
  	my $raw_hr =  YAML::Tiny->read( $file)->[0];
+ 	die "Empty config file in $file: $raw_hr". Dumper $raw_hr if ! ref $raw_hr eq 'HASH';
  	my $return;
- 	$return = $raw_hr->{common_config};
-    die "Missing mojo_log_path in common_config file $file" if ! exists $return->{mojo_log_path};
+    $return = $raw_hr->{common_config};
+    die "Missing mojo_log_path in common_config file $file\n". Dumper $return if ! exists $return->{mojo_log_path};
  	if (exists $raw_hr->{web_services}->{$moniker}) {
 		my $tmp = $raw_hr->{web_services}->{$moniker};
 		for my $key(keys %$tmp) {
