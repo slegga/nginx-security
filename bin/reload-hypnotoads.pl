@@ -25,7 +25,7 @@ for my $repo($gitdir->list({dir=>1})->each) {
 		next if ! -f $file;
 		next if $file->basename !~/web\-/;
 		my  $cmd = sprintf("hypnotoad %s %s",($ARGV[0]//''), $file);
-		print $cmd;
-		print `$cmd`;
+		say $cmd;
+		say `$cmd`;
 	}
 }
