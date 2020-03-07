@@ -1,14 +1,6 @@
 ---
 # End tasks
 
-- name: Load vars from nginx
-  include_vars:
-    dir: roles/nginx/vars/
-
-- template: src=hypnotoad.yml.j2 dest=/home/www/etc/hypnotoad.yml owner=www group=www mode=0644
-  become: yes
-  become_user: www
-
 - name: reload toadfarm
   command: "/bin/env /home/{{ ssh_user }}/git/perlbrew-cron/perlbrew-cron.sh script/toadfarm.pl reload"
   become: yes

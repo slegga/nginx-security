@@ -1,0 +1,9 @@
+---
+common_config:
+    secrets:
+        - gfhjfgfhhgghjgjhjk
+        - lgyvyYHF87977ytgg7
+    mojo_log_path: /tmp
+web_services:
+    web-login.pl:
+    web-api-home:
