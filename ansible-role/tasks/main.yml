@@ -1,13 +1,22 @@
 ---
+- name: Copy file with owner and permissions
+  copy:
+    src: mojoapp.yml
+    dest: /home/www/etc/mojoapp.yml
+    owner: www
+    group: www
+    mode: '0644'
+  become: true
+  become_user: www
 # End tasks
 
-- name: reload toadfarm
-  command: "/bin/env /home/{{ ssh_user }}/git/perlbrew-cron/perlbrew-cron.sh script/toadfarm.pl reload"
-  become: yes
-  become_user: www
-  tags: [git,perl,perlbrew,nginx]
-  args:
-    chdir: /home/{{ ssh_user }}/git/webserver/
+#- name: reload toadfarm
+#  command: "/bin/env /home/{{ ssh_user }}/git/perlbrew-cron/perlbrew-cron.sh script/toadfarm.pl reload"
+#  become: yes
+#  become_user: www
+#  tags: [git,perl,perlbrew,nginx]
+#  args:
+#    chdir: /home/{{ ssh_user }}/git/webserver/
 # PERLBREW_ROOT=/opt/perl5 PERLBREW_HOME=/home/www/.perlbrew PATH=$PATH:/usr/local/bin
 
 - name: reload hypnotoad

@@ -65,6 +65,7 @@ sub get_hypnotoad_config {
 		$rundir->make_path;
 	}
 	$return->{pid_file} = $rundir->child("$script.pid")->to_string;
+	$return->{secrets} = [ split(/[\n\s]+/, path($ENV{HOME},'etc','secrets.txt')->slurp ) ];
  	return $return;
 }
 
@@ -80,6 +81,7 @@ sub get_mojoapp_config {
     my $self = shift;
     die "Not an object $self" if !ref $self;
     my $moniker = basename(shift,'.pl');
+    my $cfg= shift;
     my $file = $self->config_dir->child('mojoapp.yml')->to_string;
     die "Common config file $file does not exists" if ! -e $file;
  	my $raw_hr =  YAML::Tiny->read( $file)->[0];
@@ -96,6 +98,9 @@ sub get_mojoapp_config {
 	$return->{moniker}       = $moniker;
 	$return->{mojo_log_path} = path($raw_hr->{common_config}->{mojo_log_path})->child("$moniker.log")->to_string;
  	die "No config in $file" if ! $raw_hr;
+ 	if ($cfg->{hypnotoad}|| $cfg->{all}) {
+ 		$return->{hypnotoad} = $self->get_hypnotoad_config();
+ 	}
  	return $return;
 }
 
