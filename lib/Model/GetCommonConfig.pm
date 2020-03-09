@@ -50,10 +50,13 @@ sub get_hypnotoad_config {
  	$return = $raw_hr->{common_config};
  	if (exists $raw_hr->{web_services}->{$script}) {
  		my $tmp = $raw_hr->{web_services}->{$script};
-		if (exists $tmp->{port}) {
-			push @{$return->{listen}},'http://127.0.0.1:'.$tmp->{port} ;
+ 		for my $key (keys %$tmp) {
+			if ($key eq 'port') {
+				push @{$return->{listen}},'http://127.0.0.1:'.$tmp->{port} ;
+			} else {
+				$return->{$key} = $tmp->{$key};
+			}
 		}
-
  	} else {
  		die "Missing config in file ". $cfile->to_string .":  web_services:->$script:";
  	}
