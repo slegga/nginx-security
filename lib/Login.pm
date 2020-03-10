@@ -51,6 +51,7 @@ sub startup {
 	$self->sessions->cookie_name( $config->{moniker} );
 
 	$self->plugin('MyApp::Plugin::Logger');
+	$self->plugin('Mojolicious::Plugin::Security'); # add helper user, add hook
 	$self->secrets($config->{secrets});
 	$self->helper(users  => sub { state $users = MyApp::Model::Users->new });
 

@@ -34,6 +34,12 @@ sub _user {
 	# return Model::User->new({user=>$dn->{cn}});
 }
 
+=head2 register
+
+Auto called from Mojolicious. Do the setup.
+
+=cut
+
 sub register {
   	my ($self, $app, $conf) = @_;
 
