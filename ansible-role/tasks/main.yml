@@ -19,6 +19,15 @@
 #    chdir: /home/{{ ssh_user }}/git/webserver/
 # PERLBREW_ROOT=/opt/perl5 PERLBREW_HOME=/home/www/.perlbrew PATH=$PATH:/usr/local/bin
 
+- name: update git
+  command: "/bin/env /home/{{ ssh_user }}/git/perlbrew-cron/perlbrew-cron.sh /home/stein/git/utilities-perl/bin/git-status --silence"
+  become: yes
+  become_user: www
+  tags: [git,perl,perlbrew,nginx]
+  args:
+    chdir: /home/{{ ssh_user }}/git/nginx-security/
+
+
 - name: reload hypnotoad
   command: "/bin/env /home/{{ ssh_user }}/git/perlbrew-cron/perlbrew-cron.sh bin/reload-hypnotoads.pl"
   become: yes
