@@ -56,9 +56,9 @@ sub startup {
 	$self->helper(users  => sub { state $users = MyApp::Model::Users->new });
 
 	my $r = $self->routes;
-	$r->get('/:base/logout')->to('login#logout');
-	$r->any('/:base/')->to('login#login')->name('landing_page');
-	$r->any('/:base/login')->to('login#login')->name('landing_page'); # because of login form
+	$r->get('/logout')->to('login#logout');
+	$r->any('/')->to('login#login')->name('landing_page');
+	$r->any('/login')->to('login#login')->name('landing_page'); # because of login form
 
 
    $self->helper (is_logged_in => sub {

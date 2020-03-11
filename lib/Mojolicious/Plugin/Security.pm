@@ -57,7 +57,7 @@ sub register {
 	}
 
 	# Register helpers
-	$app->helpers(user => \&_user);
+	$app->helper(user => \&_user);
 
 }
 1;
