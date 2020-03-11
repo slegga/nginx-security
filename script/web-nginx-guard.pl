@@ -13,15 +13,15 @@ use Mojo::JSON 'j';
 my $gcc = Model::GetCommonConfig->new;
 #my $name = fileparse($0,'.pl');
 #plugin Config => {toadfarm => $gcc->get_hypnotoad_config($0) };
+$DB::single=2;
 app->config($gcc->get_mojoapp_config($0));
 app->config(hypnotoad => $gcc->get_hypnotoad_config($0));
-app->secrets(app->config->{secrets});
+app->secrets(app->config->{hypnotoad}->{secrets});
 app->sessions->default_expiration( 3600 * 1 );
 app->sessions->secure( $ENV{TEST_INSECURE_COOKIES} ? 0 : 1 );
 app->sessions->secure( 0 );
 app->sessions->cookie_name(app->config->{moniker});
 my $secret = app->secrets->[0];
-$DB::single=2;
 if (! $ENV{TEST_INSECURE_COOKIES}) {
 	app->log->path(app->config('mojo_log_path'));
 } else {
