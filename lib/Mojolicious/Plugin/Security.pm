@@ -46,7 +46,7 @@ sub register {
   	# Register hook
   	if ( my $path = $app->config->{hypnotoad}->{service_path} ) {
   		my @path_parts = grep /\S/, split m{/}, $path;
-		$self->hook(before_dispatch =>  sub {
+		$app->hook(before_dispatch =>  sub {
 			my ( $c ) = @_;
 			my $url = $c->req->url;
 			my $base = $url->base;
