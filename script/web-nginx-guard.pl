@@ -16,7 +16,7 @@ my $gcc = Model::GetCommonConfig->new;
 $DB::single=2;
 app->config($gcc->get_mojoapp_config($0));
 app->config(hypnotoad => $gcc->get_hypnotoad_config($0));
-app->secrets(app->config->{hypnotoad}->{secrets});
+app->secrets(app->config->{secrets});
 app->sessions->default_expiration( 3600 * 1 );
 app->sessions->secure( $ENV{TEST_INSECURE_COOKIES} ? 0 : 1 );
 app->sessions->secure( 0 );

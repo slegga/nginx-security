@@ -6,7 +6,7 @@ use SH::UseLib;
 use Mojo::File 'path';
 use Carp::Always;
 # GetCommonConfig.pm - Module for extractng common config. Especially hypnotoad.
- $ENV{COMMON_CONFIG_DIR}='t/etc';
+$ENV{COMMON_CONFIG_DIR}='t/etc';
 use Model::GetCommonConfig;
 
 unlike(path('lib/Model/GetCommonConfig.pm')->slurp, qr{\<[A-Z]+\>},'All placeholders are changed');
