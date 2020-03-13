@@ -21,11 +21,9 @@
 
 - name: update git
   command: "/bin/env /home/{{ ssh_user }}/git/perlbrew-cron/perlbrew-cron.sh /home/stein/git/utilities-perl/bin/git-status --silence"
-  become: yes
-  become_user: www
   tags: [git,perl,perlbrew,nginx]
-  args:
-    chdir: /home/{{ ssh_user }}/git/nginx-security/
+#  args:
+#    chdir: /home/{{ ssh_user }}/git/nginx-security/
 
 
 - name: reload hypnotoad
