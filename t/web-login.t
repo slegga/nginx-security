@@ -12,7 +12,6 @@ my $t = Test::Mojo->new(Mojo::File->new('script/web-login.pl'));
 $t->get_ok('/')->status_is(200);
 #$t->ua->tx->req->headers('X-Original-URI' => 'https://baedi.no');
 $t->post_ok('/'=>form=>{user => 'marcus',pass => 'lulz'})->status_is(200)->content_like(qr'Welcome');
-die;
 my $tx = $t->tx;
 #print STDERR Dumper $tx;
 $t->get_ok('/?redirect_uri=/test')->status_is(200);
