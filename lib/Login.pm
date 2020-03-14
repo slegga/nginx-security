@@ -6,7 +6,7 @@ use lib "$FindBin::Bin/../../utilities-perl/lib";
 use SH::UseLib;
 use Model::GetCommonConfig;
 use Mojo::JWT;
-use MyApp::Model::Users;
+use Model::Users;
 use Data::Dumper;
 
 =head1 NAME
@@ -53,7 +53,7 @@ sub startup {
 	$self->plugin('MyApp::Plugin::Logger');
 	$self->plugin('Mojolicious::Plugin::Security'); # add helper user, add hook
 	$self->secrets($config->{secrets});
-	$self->helper(users  => sub { state $users = MyApp::Model::Users->new });
+	$self->helper(users  => sub { state $users = Model::Users->new });
 
 	my $r = $self->routes;
 	$r->get('/logout')->to('login#logout');
