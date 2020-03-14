@@ -1,6 +1,5 @@
 package Login;
 use Mojo::Base 'Mojolicious';
-#use Mojolicious::Plugins;
 use FindBin;
 use lib "$FindBin::Bin/../../utilities-perl/lib";
 use SH::UseLib;
@@ -28,21 +27,12 @@ Main loop for Login page.
 
 sub startup {
 	my $self = shift;
-#	my $conf_dir = $ENV{MOJO_CONFIG} ? $ENV{MOJO_CONFIG} : $ENV{HOME}.'/etc';
-#	my $conf_file = $conf_dir.'/myapp.conf';
 
 	my $gcc = Model::GetCommonConfig->new;
 	my $config = $gcc->get_mojoapp_config($0);
 
-
-#	$self->plugin(Config => $config);
 	$self->config($config);
 	$self->config(hypnotoad=>$gcc->get_hypnotoad_config($0));
-#		die "Missing config file: ".$conf_file if !-f $conf_file;
-#	warn Dumper $config;
-#	warn("MISSING accesslogfile in config") if ! exists $config->{'accesslogfile'};
-#	$self->plugin('Mojolicious::Plugin::AccessLog' => {log => $config->{'accesslogfile'},
-#		format => ' %h %u %{%c}t "%r" %>s %b "%{Referer}i" "%{User-Agent}i"'});
 	$self->log->path($config->{mojo_log_path});
 	$self->log->info('(Re)Start server');
 	push @{$self->static->paths}, $self->home->rel_file('static');
@@ -72,12 +62,10 @@ sub startup {
 		my $c = shift;
 		my $claims = shift;
 
-		my $jwt = Mojo::JWT->new(claims => $claims, secret => $config->{'secrets'}->[0])->encode;
+		my $jwt = Mojo::JWT->new(claims => $claims, secret => $self->secrets->[0])->encode;
 		$c->cookie('sso-jwt-token', $jwt,{expires => time + 60,secure => $ENV{TEST_INSECURE_COOKIES} ? 0 : 1, path =>'/' });
 	});
 	#slutt flytting
-
-
 }
 
 1;

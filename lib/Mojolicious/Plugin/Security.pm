@@ -1,4 +1,5 @@
 package Mojolicious::Plugin::Security;
+use Mojo::Base -strict;
 use Mojo::Base 'Mojolicious::Plugin';
 
 =encoding utf8
@@ -29,9 +30,56 @@ Return user object if logged in. Else return undef.
 sub _user {
 	my $self = shift;
 	my $c    = shift;
-	return @_;
 
-	# return Model::User->new({user=>$dn->{cn}});
+	my $headers = $c->tx->req->headers;
+	my $uri      = Mojo::URL->new( $headers->header('X-Original-URI')||'');
+
+    if ( !$uri or !defined $uri->scheme or $uri->scheme ne 'https' ) {
+        # X-Original-URI is set by nginx
+        # The guard require https to prevent man-in-the-middle cookie stealing
+        $c->app->log->error("nginx is not configured correctly: X-Original-URI is invalid. ($uri)");
+        $c->render( text => 'nginx is not configured.', status => 500 );
+    }
+
+	#GET USER
+	my $user = $c->session('user'); # User is already authenticated
+	if (!$user) { # Set by nginx, client certificate
+		$user = $headers->header('X-Common-Name');
+	}
+	if (!$user) { # Set user with ss0-jwt-token
+		if (my $jwt = $c->cookie('sso-jwt-token') ) {
+			my $claims;
+			eval {
+				$claims = Mojo::JWT->new(secret => $c->secrets->[0])->decode($jwt);
+			} or $c->app->log->error('Did not manage to validate jwt "'.$jwt.'" '.$!.' '.$@. "secret: ". $c->secrets->[0]);
+			if ($claims) {
+				$c->app->log->info('claims is '.j($claims));
+				$user = $claims->{user};
+				$c->tx->res->cookie('sso-jwt-token'=>'');
+			} else {
+				say STDERR 'Got jwt but no claims jwt:'. $jwt;
+#				say STDERR "secret: ".$c->app->secrets->[0];
+				$c->app->log->warn( 'Got jwt but no claims jwt:'. $jwt);
+			}
+		} else {
+			say STDERR "NO JWT:\n".$headers->to_string;
+			$c->app->log->warn( 'No jwt cookie');
+		}
+	}
+
+    #HANDLE USER SET
+	if ( $user ) {
+        $c->req->env->{identity} = $user;
+        $c->session->{user} = $user;
+        $c->res->headers->header( 'X-User', $user );
+        return  Model::User->new({user => $user});
+	}
+    $c->app->log->warn("Not authenticated.");
+    $c->app->log->warn("Reqest Headers:\n". $c->req->headers->to_string);
+    $c->app->log->warn("Cookie sso-jwt-token: ". ($c->cookie('sso-jwt-token')//'__UNDEF__'));
+
+	return;
+
 }
 
 =head2 register
