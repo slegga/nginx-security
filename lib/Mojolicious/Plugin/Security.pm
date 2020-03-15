@@ -105,7 +105,7 @@ sub register {
 	}
 
 	# Register helpers
-	$app->helper(user => \&_user);
+	$app->helper(user => $self->_user(@_));
 
 }
 1;

@@ -27,6 +27,7 @@ if (! $ENV{TEST_INSECURE_COOKIES}) {
 } else {
 	app->log->handle(*STDERR);
 }
+plugin('Mojolicious::Plugin::Security');
 hook before_dispatch => sub { shift->res->headers->server('Some server'); };
 
 get '/' => sub {
@@ -43,33 +44,7 @@ get '/' => sub {
     }
 
 	#GET USER
-	my $user = $c->session('user');
-	if (!$user) {
-		$user = $headers->header('X-Common-Name');
-	}
-	if (!$user) {
-		if (my $jwt = $c->cookie('sso-jwt-token') ) {
-			my $claims;
-			eval {
-				$claims = Mojo::JWT->new(secret => $secret)->decode($jwt);
-			} or $c->app->log->error('Did not manage to validate jwt "'.$jwt.'" '.$!.' '.$@. "secret: ". $secret);
-			if ($claims) {
-				$c->app->log->info('claims is '.j($claims));
-				$user = $claims->{user};
-				$c->tx->res->cookie('sso-jwt-token'=>'');
-			} else {
-				say STDERR 'Got jwt but no claims jwt:'. $jwt;
-#				say STDERR "secret: ".$c->app->secrets->[0];
-				$c->app->log->warn( 'Got jwt but no claims jwt:'. $jwt);
-			}
-		} else {
-			say STDERR "NO JWT:\n".$headers->to_string;
-			$c->app->log->warn( 'No jwt cookie');
-		}
-	}
-    $c->req->env->{identity} = $user;
-
-    #HANDLE USER SET
+	my $user = $c->user;
 	if ( $user ) {
         $c->req->env->{identity} = $c->session('user');
         if ( $uri =~ m!/logout\b! ) {
