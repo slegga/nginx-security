@@ -1,6 +1,30 @@
 package Mojolicious::Plugin::Security;
 use Mojo::Base -strict;
 use Mojo::Base 'Mojolicious::Plugin';
+use Mojo::JSON 'j';
+use Data::Dumper;
+use Mojo::JWT;
+use Mojo::JSON 'j';
+use Mojo::File 'path';
+
+my $lib;
+BEGIN {
+    my $gitdir = Mojo::File->curfile;
+    my @cats = @$gitdir;
+    while (my $cd = pop @cats) {
+        if ($cd eq 'git') {
+            $gitdir = path(@cats,'git');
+            last;
+        }
+    }
+    $lib =  $gitdir->child('utilities-perl','lib')->to_string; #return utilities-perl/lib
+};
+
+use lib $lib;
+use SH::UseLib;
+use Model::GetCommonConfig;
+use Model::Users;
+
 
 =encoding utf8
 
@@ -28,9 +52,9 @@ Return user object if logged in. Else return undef.
 =cut
 
 sub _user {
-	my $self = shift;
-	my $c    = shift;
-
+    say STDERR $_ for @_;
+	my $c   = shift;  # Mojolicious::Controller
+	
 	my $headers = $c->tx->req->headers;
 	my $uri      = Mojo::URL->new( $headers->header('X-Original-URI')||'');
 
@@ -50,8 +74,8 @@ sub _user {
 		if (my $jwt = $c->cookie('sso-jwt-token') ) {
 			my $claims;
 			eval {
-				$claims = Mojo::JWT->new(secret => $c->secrets->[0])->decode($jwt);
-			} or $c->app->log->error('Did not manage to validate jwt "'.$jwt.'" '.$!.' '.$@. "secret: ". $c->secrets->[0]);
+				$claims = Mojo::JWT->new(secret => $c->app->secrets->[0])->decode($jwt);
+			} or $c->app->log->error('Did not manage to validate jwt "'.$jwt.'" '.$!.' '.$@. "secret: ". $c->app->secrets->[0]);
 			if ($claims) {
 				$c->app->log->info('claims is '.j($claims));
 				$user = $claims->{user};
@@ -72,7 +96,7 @@ sub _user {
         $c->req->env->{identity} = $user;
         $c->session->{user} = $user;
         $c->res->headers->header( 'X-User', $user );
-        return  Model::User->new({user => $user});
+        return  Model::Users->new({user => $user});
 	}
     $c->app->log->warn("Not authenticated.");
     $c->app->log->warn("Reqest Headers:\n". $c->req->headers->to_string);
@@ -89,7 +113,7 @@ Auto called from Mojolicious. Do the setup.
 =cut
 
 sub register {
-  	my ($self, $app, $conf) = @_;
+  	my ( $self, $app ) = @_;
 
   	# Register hook
   	if ( my $path = $app->config->{hypnotoad}->{service_path} ) {
@@ -105,7 +129,7 @@ sub register {
 	}
 
 	# Register helpers
-	$app->helper(user => $self->_user(@_));
+	$app->helper(user => sub {_user(@_)});
 
 }
 1;

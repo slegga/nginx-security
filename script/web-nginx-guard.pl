@@ -44,7 +44,7 @@ get '/' => sub {
     }
 
 	#GET USER
-	my $user = $c->user;
+	my $user = $c->user();
 	if ( $user ) {
         $c->req->env->{identity} = $c->session('user');
         if ( $uri =~ m!/logout\b! ) {
