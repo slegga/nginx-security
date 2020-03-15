@@ -32,6 +32,38 @@ use Model::Users;
 
 Mojolicious::Plugin::Security
 
+=head1 SYNOPSIS
+
+	package MyApp;
+	use Mojo::Base 'Mojolicious';
+	use Mojo::File 'path';
+
+	my $lib;
+	BEGIN {
+	    my $gitdir = Mojo::File->curfile;
+	    my @cats = @$gitdir;
+	    while (my $cd = pop @cats) {
+	        if ($cd eq 'git') {
+	            $gitdir = path(@cats,'git');
+	            last;
+	        }
+	    }
+	    $lib =  $gitdir->child('utilities-perl','lib')->to_string; #return utilities-perl/lib
+	};
+
+	use lib $lib;
+	use SH::UseLib;
+	use Model::GetCommonConfig;
+
+	sub startup {
+		my $self = shift;
+		my $gcc = Model::GetCommonConfig->new;
+		my $config = $gcc->get_mojoapp_config($0);
+		$config->{hypnotoad} = $gcc->get_hypnotoad_config($0);
+		$self->config($config);
+		$self->secrets($config->{secrets});
+		$self->plugin('Mojolicious::Plugin::Security');
+		my $logged_in = $self->routes->under('/' => sub {my $c = shift;return 1 if $c->user;return});
 
 =head1 DESCRIPTION
 
@@ -54,7 +86,7 @@ Return user object if logged in. Else return undef.
 sub _user {
     say STDERR $_ for @_;
 	my $c   = shift;  # Mojolicious::Controller
-	
+
 	my $headers = $c->tx->req->headers;
 	my $uri      = Mojo::URL->new( $headers->header('X-Original-URI')||'');
 
