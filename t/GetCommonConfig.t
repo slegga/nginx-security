@@ -11,7 +11,7 @@ use Model::GetCommonConfig;
 
 unlike(path('lib/Model/GetCommonConfig.pm')->slurp, qr{\<[A-Z]+\>},'All placeholders are changed');
 my $m  = Model::GetCommonConfig->new(config_dir =>path('t/etc') );
-is($m->get_hypnotoad_config($0)->{listen}->[0], 'http://127.0.0.1:42');
-like($m->get_hypnotoad_config($0)->{pid_file}, qr'/home/\w+/run/GetCommonConfig\.t\.pid');
-is($m->get_mojoapp_config($0)->{secrets}->[0],'abc');
+is($m->get_mojoapp_config($0)->{hypnotoad}->{listen}->[0], 'http://127.0.0.1:42');
+like($m->get_mojoapp_config($0)->{hypnotoad}->{pid_file}, qr'/home/\w+/run/GetCommonConfig\.t\.pid');
+is($m->get_mojoapp_config($0)->{secrets}->[0],'fddfdsdghgtrfdfghrery');
 done_testing;

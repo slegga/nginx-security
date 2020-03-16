@@ -32,7 +32,7 @@ sub startup {
 	my $config = $gcc->get_mojoapp_config($0);
 
 	$self->config($config);
-	$self->config(hypnotoad=>$gcc->get_hypnotoad_config($0));
+	$self->secrets($config->{secrets});
 	$self->log->path($config->{mojo_log_path});
 	$self->log->info('(Re)Start server');
 	push @{$self->static->paths}, $self->home->rel_file('static');
