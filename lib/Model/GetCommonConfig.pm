@@ -33,13 +33,12 @@ has config_dir => sub{ $ENV{COMMON_CONFIG_DIR} ? path($ENV{COMMON_CONFIG_DIR}) :
 
 =head1 METHODS
 
-=head2 get_hypnotoad_config
-
-Return hypnotoad config from common config file
+# =head2 get_hypnotoad_config
+# Return hypnotoad config from common config file
 
 =cut
 
-sub get_hypnotoad_config {
+sub _get_hypnotoad_config {
     my $self = shift;
     die "Not an object $self" if !ref $self;
     my $script = basename(shift,'.pl');
@@ -68,7 +67,7 @@ sub get_hypnotoad_config {
 		$rundir->make_path;
 	}
 	$return->{pid_file} = $rundir->child("$script.pid")->to_string;
-	$return->{secrets} = [ split(/[\n\s]+/, path($ENV{HOME},'etc','secrets.txt')->slurp ) ];
+	$DB::single=2;
  	return $return;
 }
 
@@ -100,10 +99,9 @@ sub get_mojoapp_config {
  	}
 	$return->{moniker}       = $moniker;
 	$return->{mojo_log_path} = path($raw_hr->{common_config}->{mojo_log_path})->child("$moniker.log")->to_string;
+	$return->{secrets} = [ split(/[\n\s]+/, path(($ENV{COMMON_CONFIG_DIR}//$ENV{HOME}.'/etc'),'secrets.txt')->slurp ) ];
  	die "No config in $file" if ! $raw_hr;
- 	if ($cfg->{hypnotoad}|| $cfg->{all}) {
- 		$return->{hypnotoad} = $self->get_hypnotoad_config();
- 	}
+	$return->{hypnotoad} = $self->_get_hypnotoad_config($moniker);
  	return $return;
 }
 

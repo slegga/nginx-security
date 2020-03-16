@@ -1,12 +1,13 @@
 use Test::More;
 use Test::Mojo;
 use Mojo::Base -strict;
-use Mojo::File;
+use Mojo::File 'path';
 use Carp::Always;
 use Mojo::JWT;
 use lib '.';
 $ENV{COMMON_CONFIG_DIR} ='t/etc';
-my $secret = 'abc';
+my $secret = (split(/[\n\s]+/,path($ENV{COMMON_CONFIG_DIR},'secrets.txt')->slurp))[0];
+diag '$secret = '.$secret;
 my $t = Test::Mojo->new(Mojo::File->new('script/web-nginx-guard.pl'));
 is($t->app->secrets->[0], $secret);
 my $jwt = Mojo::JWT->new(claims=>{user=>'adoer',expires => time + 60},secret=>$secret)->encode;
