@@ -153,7 +153,7 @@ sub register {
   		my @path_parts = grep /\S/, split m{/}, $path;
 		$app->hook(before_dispatch =>  sub {
 			my ( $c ) = @_;
-			if ($c-req->method ne 'POST') {
+			if ($c->req->method ne 'POST') {
 				my $url = $c->req->url;
 				my $base = $url->base;
 				push @{ $base->path }, @path_parts;
