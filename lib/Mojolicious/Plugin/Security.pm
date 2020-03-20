@@ -154,15 +154,10 @@ sub register {
 		$app->hook(before_dispatch =>  sub {
 			my ( $c ) = @_;
 			my $url = $c->req->url;
-			if ($c->req->method eq 'POST') {
-				$url->base->path('/');
-			} else {
-
-				my $base = $url->base;
-				push @{ $base->path }, @path_parts;
-				$base->path->trailing_slash(1);
-				$url->path->leading_slash(0);
-			}
+			my $base = $url->base;
+			$base->path( @path_parts );
+			$base->path->trailing_slash(1);
+			$url->path->leading_slash(0);
 		});
 	}
 
