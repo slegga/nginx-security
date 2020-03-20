@@ -28,6 +28,11 @@ Main loop for Login page.
 sub startup {
 	my $self = shift;
 
+	#MUST CHANGE WHEN FIXED
+	$self->mode('development');
+
+
+
 	my $gcc = Model::GetCommonConfig->new;
 	my $config = $gcc->get_mojoapp_config($0);
 
