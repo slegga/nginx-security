@@ -156,6 +156,9 @@ sub register {
 			my $url = $c->req->url;
 			my $base = $url->base;
 			$base->path ( @path_parts);
+			if (index($path, $url->path) == 0) {
+				$url->path(substr($url->path,length $path)); # remove base
+			}
 			$base->path->trailing_slash(1);
 			$url->path->leading_slash(0);
 		});
