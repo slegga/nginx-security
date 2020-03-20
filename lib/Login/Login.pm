@@ -51,6 +51,7 @@ sub login {
 	$self->session(user => $user);
 	$self->set_jwt_cookie({user=> $user, expires => time +60 });
 	if (my $redirect = $self->session('redirect_to')) {
+		$self->app->log->warn("Redirect to $redirect");
 		$self->session('redirect_to' => undef); # remove redirect for later reloging
 		return $self->redirect_to($redirect);
 	}

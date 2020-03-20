@@ -153,11 +153,13 @@ sub register {
   		my @path_parts = grep /\S/, split m{/}, $path;
 		$app->hook(before_dispatch =>  sub {
 			my ( $c ) = @_;
-			my $url = $c->req->url;
-			my $base = $url->base;
-			push @{ $base->path }, @path_parts;
-			$base->path->trailing_slash(1);
-			$url->path->leading_slash(0);
+			if ($c-req->method ne 'POST') {
+				my $url = $c->req->url;
+				my $base = $url->base;
+				push @{ $base->path }, @path_parts;
+				$base->path->trailing_slash(1);
+				$url->path->leading_slash(0);
+			}
 		});
 	}
 
