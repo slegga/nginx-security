@@ -21,7 +21,7 @@
 
 - name: update git
   command: "/bin/env /home/{{ ssh_user }}/git/perlbrew-cron/perlbrew-cron.sh /home/stein/git/utilities-perl/bin/git-status --silence"
-  tags: [git,perl,perlbrew,nginx]
+  tags: [git,perl,perlbrew,nginx,mojo]
 #  args:
 #    chdir: /home/{{ ssh_user }}/git/nginx-security/
 
@@ -30,6 +30,6 @@
   command: "/bin/env /home/{{ ssh_user }}/git/perlbrew-cron/perlbrew-cron.sh bin/reload-hypnotoads.pl"
   become: yes
   become_user: www
-  tags: [git,perl,perlbrew,nginx]
+  tags: [git,perl,perlbrew,nginx,mojo]
   args:
     chdir: /home/{{ ssh_user }}/git/nginx-security/
