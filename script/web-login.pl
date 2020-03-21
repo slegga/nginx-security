@@ -22,8 +22,10 @@ use SH::UseLib;
 use Mojolicious::Lite;
 use Model::GetCommonConfig;
 my $cfg = Model::GetCommonConfig->new->get_mojoapp_config($0);
-app->routes->route($cfg->{hypnotoad}->{service_path})->detour('Login',{secrets=>$cfg->{secrets} });
-
+warn $cfg->{hypnotoad}->{service_path};
+my $rs=app->routes;
+$rs->route($cfg->{hypnotoad}->{service_path})->detour('Login',{secrets=>$cfg->{secrets} });
+app->routes($rs);
 app->start;
 # BEGIN { unshift @INC, "$FindBin::Bin/../lib" }
 # use Mojolicious::Commands;

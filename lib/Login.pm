@@ -49,11 +49,11 @@ sub startup {
 	$self->plugin('Mojolicious::Plugin::Security'); # add helper user, add hook
 	$self->secrets($config->{secrets});
 	$self->helper(users  => sub { state $users = Model::Users->new });
-
-	my $r = $self->routes;
-	$r->get('/logout')->to('login#logout');
-	$r->any('/')->to('login#login')->name('landing_page');
-	$r->any('/login')->to('login#login')->name('landing_page'); # because of login form
+	my $spath= $config->{hypnotoad}->{service_path};
+	my $r = $self->routes->route("/$spath");
+	$r->get("/logout")->to('login#logout');
+	$r->any("/")->to('login#login')->name('landing_page');
+	$r->any("/login")->to('login#login')->name('landing_page'); # because of login form
 
 
    $self->helper (is_logged_in => sub {
