@@ -5,8 +5,8 @@ use Mojo::JSON 'j';
 use Data::Dumper;
 use Mojo::JWT;
 use Mojo::JSON 'j';
-use Mojo::File 'path';
 
+use Mojo::File 'path';
 my $lib;
 BEGIN {
     my $gitdir = Mojo::File->curfile;
@@ -19,9 +19,9 @@ BEGIN {
     }
     $lib =  $gitdir->child('utilities-perl','lib')->to_string; #return utilities-perl/lib
 };
-
 use lib $lib;
 use SH::UseLib;
+
 use Model::GetCommonConfig;
 use Model::Users;
 
@@ -149,20 +149,20 @@ sub register {
   	my ( $self, $app ) = @_;
 
   	# Register hook
-  	if ( my $path = $app->config->{hypnotoad}->{service_path} ) {
-  		my @path_parts = grep /\S/, split m{/}, $path;
-		$app->hook(before_dispatch =>  sub {
-			my ( $c ) = @_;
-			my $url = $c->req->url;
-			my $base = $url->base;
-			$base->path ( @path_parts);
-			if (index($path, $url->path) == 0) {
-				$url->path(substr($url->path,length $path)); # remove base
-			}
-			$base->path->trailing_slash(1);
-			$url->path->leading_slash(0);
-		});
-	}
+#  	if ( my $path = $app->config->{hypnotoad}->{service_path} ) {
+ # 		my @path_parts = grep /\S/, split m{/}, $path;
+#		$app->hook(before_dispatch =>  sub {
+#			my ( $c ) = @_;
+#			my $url = $c->req->url;
+#			my $base = $url->base;
+#			$base->path ( @path_parts);
+#			if (index($path, $url->path) == 0) {
+#				$url->path(substr($url->path,length $path)); # remove base
+#			}
+#			$base->path->trailing_slash(1);
+#			$url->path->leading_slash(0);
+#		});
+#	}
 
 	# Register helpers
 	$app->helper(user => sub {_user(@_)});
