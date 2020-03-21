@@ -30,13 +30,17 @@ sub startup {
 
 	#MUST CHANGE WHEN FIXED
 	$self->mode('development');
+	$DB::single=2;
+	my $config;
 
+	if (scalar keys %{$self->config}<3) {
+		my $gcc = Model::GetCommonConfig->new;
+		$config = $gcc->get_mojoapp_config($0,{debug=>1});
 
-
-	my $gcc = Model::GetCommonConfig->new;
-	my $config = $gcc->get_mojoapp_config($0);
-
-	$self->config($config);
+		$self->config($config);
+	} else {
+		$config = $self->config;
+	}
 	$self->secrets($config->{secrets});
 	$self->log->path($config->{mojo_log_path});
 	$self->log->info('(Re)Start server');
@@ -50,7 +54,10 @@ sub startup {
 	$self->secrets($config->{secrets});
 	$self->helper(users  => sub { state $users = Model::Users->new });
 	my $spath= $config->{hypnotoad}->{service_path};
-	my $r = $self->routes->route("/$spath");
+	if (!$spath) {
+		die Dumper $config;
+	}
+	my $r = $self->routes->under("/$spath");
 	$r->get("/logout")->to('login#logout');
 	$r->any("/")->to('login#login')->name('landing_page');
 	$r->any("/login")->to('login#login')->name('landing_page'); # because of login form

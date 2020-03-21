@@ -9,9 +9,9 @@ use Model::GetCommonConfig;
 $ENV{COMMON_CONFIG_DIR} ='t/etc';
 $ENV{TEST_INSECURE_COOKIES}=1;
 
-my $cfg = Model::GetCommonConfig->new->get_mojoapp_config($0);
+my $cfg = Model::GetCommonConfig->new->get_mojoapp_config('web-login');
 my $spath = $cfg->{hypnotoad}->{service_path};
-my $t = Test::Mojo->new(Mojo::File->new('script/web-login.pl'));
+my $t = Test::Mojo->new(Mojo::File->new('script/web-login.pl'),{config=>$cfg});
 $t->get_ok("/$spath/")->status_is(200);
 my $user ='marcus';
 $t->post_ok("/$spath/"=>form=>{user => $user,pass => 'lulz'})->status_is(200)->content_like(qr'Welcome');
