@@ -7,7 +7,7 @@ web_services:
         repo: nginx-security
         port: 8101
         security_level: public
-    web-login:
+    Login:
         repo: nginx-security
         port: 8102
         security_level: public

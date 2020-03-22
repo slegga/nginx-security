@@ -31,9 +31,10 @@ sub startup {
 	#MUST CHANGE WHEN FIXED
 	$self->mode('development');
 	$DB::single=2;
-	my $config;
+	my $config =  $self->config;
 
-	if (scalar keys %{$self->config}<3) {
+	if ( scalar keys %{$config} < 3 ) {
+		say STDERR Dumper $config;
 		my $gcc = Model::GetCommonConfig->new;
 		$config = $gcc->get_mojoapp_config($0,{debug=>1});
 

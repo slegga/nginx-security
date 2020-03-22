@@ -2,10 +2,23 @@
 
 use Mojo::Base -strict;
 use warnings;
-use FindBin;
-use lib "$FindBin::Bin/../../utilities-perl/lib";
-use SH::UseLib;
+
 use Mojo::File 'path';
+my $lib;
+BEGIN {
+    my $gitdir = Mojo::File->curfile;
+    my @cats = @$gitdir;
+    while (my $cd = pop @cats) {
+        if ($cd eq 'git') {
+            $gitdir = path(@cats,'git');
+            last;
+        }
+    }
+    $lib =  $gitdir->child('utilities-perl','lib')->to_string; #return utilities-perl/lib
+};
+use lib $lib;
+use SH::UseLib;
+
 
 =head1 NAME
 
@@ -28,4 +41,12 @@ for my $repo($gitdir->list({dir=>1})->each) {
 		say $cmd;
 		say `$cmd`;
 	}
+}
+my @classes = ('Login','MyApp');
+for my $class (@classes) {
+		$ENV{MOJO_CLASSNAME} = $class;
+		my  $cmd = sprintf("MOJO_CLASSNAME=%s hypnotoad mojo-start-app.pl %s", $class, ($ARGV[0]//''));
+		say $cmd;
+		say `$cmd`;
+
 }
