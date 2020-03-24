@@ -58,7 +58,7 @@ sub startup {
 	if (!$spath) {
 		die Dumper $config;
 	}
-	my $r = $self->routes;#->under("/$spath");
+	my $r = $self->routes->under("/$spath");
 	$r->get("/logout")->to('login#logout');
 	$r->any("/")->to('login#login')->name('landing_page');
 	$r->any("/login")->to('login#login')->name('landing_page'); # because of login form

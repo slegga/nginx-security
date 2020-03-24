@@ -20,7 +20,7 @@ use lib $lib;
 use SH::UseLib;
 use Mojolicious::Commands;
 use Model::GetCommonConfig;
-my $classname = $ARGV[0]||$ENV{MOJO_CLASSNAME};
+my $classname = $ENV{MOJO_CLASSNAME} || $ARGV[0];
 die "Missing Mojolicious classname argument" if ! $classname;
 my $cfg = Model::GetCommonConfig->new->get_mojoapp_config($classname);
 say STDERR  sprintf("%s  %s",($cfg->{hypnotoad}->{service_path}//'__UNDEF__'), ($classname//'__UNDEF__'));
@@ -33,6 +33,5 @@ web-login.pl - Master login. The main webserver script.
 
 # Start command line interface for application
 my $app = Mojo::Server->new->build_app($classname,config => $cfg);
-$app->routes->pattern(Mojolicious::Routes::Pattern->new('/'.$cfg->{hypnotoad}->{service_path}));
 $app->start;
 
