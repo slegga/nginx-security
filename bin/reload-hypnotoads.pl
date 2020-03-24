@@ -45,7 +45,7 @@ for my $repo($gitdir->list({dir=>1})->each) {
 my @classes = ('Login','MyApp');
 for my $class (@classes) {
 		$ENV{MOJO_CLASSNAME} = $class;
-		my  $cmd = sprintf("MOJO_CLASSNAME=%s hypnotoad /home/stein/git/nginx-security/mojo-start-app.pl %s", $class, ($ARGV[0]//''));
+		my  $cmd = sprintf("MOJO_CLASSNAME=%s hypnotoad /home/stein/git/nginx-security/bin/mojo-start-app.pl %s", $class, ($ARGV[0]//''));
 		say $cmd;
 		say `$cmd`;
 
