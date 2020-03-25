@@ -22,7 +22,6 @@ BEGIN {
 use lib $lib;
 use SH::UseLib;
 
-use Model::GetCommonConfig;
 use Model::Users;
 
 
@@ -77,16 +76,16 @@ Read $app->config->{hypnotoad}->{service_path} and adjust urls.
 
 =head1 HELPERS
 
-=head2 render_unauthenticated
+=head2 unauthenticated
 
 Render unauthenicated error page.
 
 =cut
 
-sub render_unauthenticated {
+sub unauthenticated {
     my ($self,$c,$format) = @_;
-    $c->render(status=>401, text=>'Unauthenticated', format=>($format//'txt'));
-    return;
+    return $c->redirect('/xlogin/');
+
 }
 
 =head2 user
@@ -179,7 +178,7 @@ sub register {
 
 	# Register helpers
 	$app->helper(user => sub {$self->user(@_)});
-    $app->helper(render_unauthenticated => sub {$self->render_unauthenticated(@_)});
+    $app->helper(unauthenticated => sub {$self->unauthenticated(@_)});
 
 }
 1;
