@@ -1,5 +1,5 @@
 package Mojolicious::Plugin::Security;
-use Mojo::Base -strict;
+use Mojo::Base -strict -signatures;
 use Mojo::Base 'Mojolicious::Plugin';
 use Mojo::JSON 'j';
 use Data::Dumper;
@@ -77,14 +77,27 @@ Read $app->config->{hypnotoad}->{service_path} and adjust urls.
 
 =head1 HELPERS
 
+=head2 render_unauthenticated
+
+Render unauthenicated error page.
+
+=cut
+
+sub render_unauthenticated {
+    my ($self,$c,$format) = @_;
+    $c->render(status=>401, text=>'Unauthenticated', format=>($format//'txt'));
+    return;
+}
+
 =head2 user
 
 Return user object if logged in. Else return undef.
 
 =cut
 
-sub _user {
+sub user {
     say STDERR $_ for @_;
+    my $self = shift;
 	my $c   = shift;  # Mojolicious::Controller
 
 	my $headers = $c->tx->req->headers;
@@ -165,7 +178,8 @@ sub register {
 #	}
 
 	# Register helpers
-	$app->helper(user => sub {_user(@_)});
+	$app->helper(user => sub {$self->user(@_)});
+    $app->helper(render_unauthenticated => sub {$self->render_unauthenticated(@_)});
 
 }
 1;
