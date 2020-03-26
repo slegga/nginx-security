@@ -102,15 +102,6 @@ sub user {
 	my $c   = shift;  # Mojolicious::Controller
 
 	my $headers = $c->tx->req->headers;
-	$DB::single=2;
-	my $uri      = Mojo::URL->new( $headers->header('X-Original-URI')||'');
-
-    if ( !$ENV{TEST_INSECURE_COOKIES} && (!$uri or !defined $uri->scheme or $uri->scheme ne 'https' )) {
-        # X-Original-URI is set by nginx
-        # The guard require https to prevent man-in-the-middle cookie stealing
-        $c->app->log->error("nginx is not configured correctly: X-Original-URI is invalid. ($uri)");
-        $c->render( text => 'nginx is not configured.', status => 500 );
-    }
 
 	#GET USER
 	my $user = $c->session('user'); # User is already authenticated
