@@ -85,7 +85,7 @@ Render unauthenicated error page.
 sub unauthenticated {
     my ($self,$c,$format) = @_;
     my $url = Mojo::URL->new('/xlogin')->query(redirect_uri => $c->url_for);
-    $c->redirect_to("/xlogin/");
+    $c->redirect_to($url);
     return undef; ##no critic
 
 }
