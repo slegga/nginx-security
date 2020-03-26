@@ -84,7 +84,8 @@ Render unauthenicated error page.
 
 sub unauthenticated {
     my ($self,$c,$format) = @_;
-    return $c->redirect_to('/xlogin/');
+    $c->redirect_to('/xlogin/');
+    return undef;
 
 }
 
