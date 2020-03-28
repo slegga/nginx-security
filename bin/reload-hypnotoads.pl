@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-
+use YAML::Tiny;
 use Mojo::Base -strict;
 use warnings;
 
@@ -27,7 +27,7 @@ web-login.pl - Master login. The main webserver script.
 =cut
 
 # Start command line interface for application
-
+my $cfg = YAML::Tiny->load($ENV{HOME}.'/etc/general.yml');
 my $gitdir = Mojo::File->curfile;
 $gitdir = path(@$gitdir[0 .. $#$gitdir-3]);
 for my $repo($gitdir->list({dir=>1})->each) {
@@ -45,7 +45,7 @@ for my $repo($gitdir->list({dir=>1})->each) {
 my @classes = ('Login','MyApp');
 for my $class (@classes) {
 		$ENV{MOJO_CLASSNAME} = $class;
-		my  $cmd = sprintf("MOJO_CLASSNAME=%s hypnotoad /home/stein/git/nginx-security/bin/mojo-start-app.pl %s", $class, ($ARGV[0]//''));
+		my  $cmd = sprintf("MOJO_CLASSNAME=%s hypnotoad /home/%s/git/nginx-security/bin/mojo-start-app.pl %s", $class, $cfg->{master_user}, ($ARGV[0]//''));
 		say $cmd;
 		say `$cmd`;
 
