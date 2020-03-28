@@ -27,7 +27,7 @@ web-login.pl - Master login. The main webserver script.
 =cut
 
 # Start command line interface for application
-my $cfg = YAML::Tiny->load($ENV{HOME}.'/etc/general.yml');
+my $cfg = YAML::Tiny->read($ENV{HOME}.'/etc/general.yml')->[0];
 my $gitdir = Mojo::File->curfile;
 $gitdir = path(@$gitdir[0 .. $#$gitdir-3]);
 for my $repo($gitdir->list({dir=>1})->each) {
