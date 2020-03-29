@@ -7,6 +7,7 @@ use YAML::Tiny;
 use Data::Dumper;
 use File::Basename;
 use Carp::Always;
+use Carp 'confess';
 
 =head1 NAME
 
@@ -88,7 +89,8 @@ sub get_mojoapp_config {
     my $self = shift;
 
     die "Not an object $self" if !ref $self;
-    my $moniker = basename(shift,'.pl');
+    my $filename = shift //confess "Missing script or modulename in input";
+    my $moniker = basename($filename,'.pl');
     my $cfg= shift;
     my $file = $self->config_dir->child('mojoapp.yml')->to_string;
     die "Common config file $file does not exists" if ! -e $file;

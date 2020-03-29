@@ -78,7 +78,8 @@ Read $app->config->{hypnotoad}->{service_path} and adjust urls.
 
 =cut
 
-has config => sub {Model::GetCommonConfig->new->get_mojoapp_config};
+has 'main_module_name';
+has config => sub {Model::GetCommonConfig->new->get_mojoapp_config(shift->main_module_name||$0)};
 
 =head1 HELPERS
 
