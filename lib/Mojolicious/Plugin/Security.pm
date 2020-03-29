@@ -21,7 +21,7 @@ BEGIN {
 };
 use lib $lib;
 use SH::UseLib;
-
+use Model::GetCommonConfig;
 use Model::Users;
 
 
@@ -74,20 +74,35 @@ Common module for security issue and utility module.
 
 Read $app->config->{hypnotoad}->{service_path} and adjust urls.
 
+=head1 ATTRIBUTES
+
+=cut
+
+has config => sub {Model::GetCommonConfig->new->get_mojoapp_config};
+
 =head1 HELPERS
 
 =head2 unauthenticated
 
-Render unauthenicated error page.
+Redirects to login page
 
 =cut
 
 sub unauthenticated {
     my ($self,$c,$format) = @_;
-    my $url = Mojo::URL->new('/xlogin/login')->query(redirect_uri => $c->url_for);
+    my $url = Mojo::URL->new($self->config->{login_path}.'/login')->query(redirect_uri => $c->url_for);
     $c->redirect_to($url);
     return undef; ##no critic
 
+}
+
+=head2 url_logout
+
+=cut
+
+sub url_logout {
+    my ($self,$c,$format) = @_;
+    return Mojo::URL->new($self->config->{login_path}.'/logout')->to_abs;
 }
 
 =head2 user
@@ -170,8 +185,9 @@ sub register {
 #	}
 
 	# Register helpers
-	$app->helper(user => sub {$self->user(@_)});
-    $app->helper(unauthenticated => sub {$self->unauthenticated(@_)});
+	for my $h(qw/user unauthenticated url_logout/ ) {
+    	$app->helper($h => sub {$self->$h(@_)});
+	}
 
 }
 1;
