@@ -30,6 +30,8 @@ web-login.pl - Master login. The main webserver script.
 my $cfg = YAML::Tiny->read($ENV{HOME}.'/etc/general.yml')->[0];
 my $gitdir = Mojo::File->curfile;
 $gitdir = path(@$gitdir[0 .. $#$gitdir-3]);
+
+my $ret_code=0;
 for my $repo($gitdir->list({dir=>1})->each) {
 	next if !-d $repo;
 	my $scriptdir = $repo->child('script');
@@ -37,16 +39,20 @@ for my $repo($gitdir->list({dir=>1})->each) {
 	for my $file($scriptdir->list->each) {
 		next if ! -f $file;
 		next if $file->basename !~/web\-/;
-		my  $cmd = sprintf("hypnotoad %s %s",($ARGV[0]//''), $file);
-		say $cmd;
-		say `$cmd`;
+		my  @cmd = ("hypnotoad", $file);
+		push @cmd, $file if $file;
+		say join(' ',@cmd);
+		$ret_code += system(@cmd);
 	}
 }
 my @classes = ('Login','MyApp');
+
 for my $class (@classes) {
 		$ENV{MOJO_CLASSNAME} = $class;
-		my  $cmd = sprintf("MOJO_CLASSNAME=%s hypnotoad /home/%s/git/nginx-security/bin/mojo-start-app.pl %s", $class, $cfg->{master_user}, ($ARGV[0]//''));
-		say $cmd;
-		say `$cmd`;
-
+		my  $cmd = sprintf("MOJO_CLASSNAME=%s hypnotoad /home/%s/git/nginx-security/bin/mojo-start-app.pl", $class, $cfg->{master_user});
+		my @cmd =($cmd);
+		push @cmd, $ARGV[0] if $ARGV[0];
+		say join(' ',@cmd);
+		$ret_code += system(@cmd);
 }
+exit($ret_code);
