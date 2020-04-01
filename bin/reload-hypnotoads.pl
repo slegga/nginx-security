@@ -2,6 +2,7 @@
 use YAML::Tiny;
 use Mojo::Base -strict;
 use warnings;
+use Capture::Tiny 'capture';
 
 use Mojo::File 'path';
 my $lib;
@@ -26,10 +27,25 @@ web-login.pl - Master login. The main webserver script.
 
 =cut
 
+sub xsystem {
+    my @cmd = @_;
+    say join(' ',@cmd);
+    my $ret_code;
+    my ($stdout,$stderr,@result) = capture {
+        $ret_code = system(@cmd);
+    };
+    say $stdout;
+    say $stderr if $stderr;
+
+    $ret_code += 1 if ($stderr);
+    return $ret_code;
+}
+
 # Start command line interface for application
 my $cfg = YAML::Tiny->read($ENV{HOME}.'/etc/general.yml')->[0];
 my $gitdir = Mojo::File->curfile;
 $gitdir = path(@$gitdir[0 .. $#$gitdir-3]);
+my $exit=0;
 
 my $ret_code=0;
 for my $repo($gitdir->list({dir=>1})->each) {
@@ -41,8 +57,7 @@ for my $repo($gitdir->list({dir=>1})->each) {
 		next if $file->basename !~/web\-/;
 		my  @cmd = ("hypnotoad", $file);
 		push @cmd, $file if $file;
-		say join(' ',@cmd);
-		$ret_code += system(@cmd);
+		$exit += xsystem(@cmd);
 	}
 }
 my @classes = ('Login','MyApp');
@@ -53,6 +68,7 @@ for my $class (@classes) {
 		my @cmd =($cmd);
 		push @cmd, $ARGV[0] if $ARGV[0];
 		say join(' ',@cmd);
-		$ret_code += system(@cmd);
+		$exit += xsystem(@cmd);
 }
-exit($ret_code);
+say $exit if $exit;
+exit($exit);
