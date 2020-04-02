@@ -37,7 +37,7 @@ sub xsystem {
     say $stdout;
     say $stderr if $stderr;
 
-    $ret_code += 1 if ($stderr);
+    $ret_code += 1 if ($stderr =~/line/);
     return $ret_code;
 }
 
