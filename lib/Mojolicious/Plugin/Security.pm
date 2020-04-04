@@ -58,7 +58,6 @@ Mojolicious::Plugin::Security
 		my $self = shift;
 		my $gcc = Model::GetCommonConfig->new;
 		my $config = $gcc->get_mojoapp_config($0);
-		$config->{hypnotoad} = $gcc->get_hypnotoad_config($0);
 		$self->config($config);
 		$self->secrets($config->{secrets});
 		$self->plugin('Mojolicious::Plugin::Security');
