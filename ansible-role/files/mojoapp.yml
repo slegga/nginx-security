@@ -5,15 +5,12 @@ common_config:
     isp_ip_range:
         - '10.0.0.0 - 10.255.255.255'
         - '127.0.0.1 -127.0.0.255'
-
+    login_path: /xlogin
 web_services:
-    web-nginx-guard:
-    web-login.pl:
-    web-api-home:
     web-api-piano:
         blueprint_dir: "${HOME}/git/api-piano/blueprints"
         openapi_def:   api-gen.json
-    web-private:
+    MyApp:
         pi-status-file: /home/www/data/pi-status.json
         accesslogfile:  /home/www/log/pi-web-access.log
 

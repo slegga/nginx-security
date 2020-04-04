@@ -6,6 +6,8 @@ use open ':encoding(UTF-8)';
 use YAML::Tiny;
 use Data::Dumper;
 use File::Basename;
+use Carp::Always;
+use Carp 'confess';
 
 =head1 NAME
 
@@ -30,6 +32,7 @@ Default to ~/etc
 =cut
 
 has config_dir => sub{ $ENV{COMMON_CONFIG_DIR} ? path($ENV{COMMON_CONFIG_DIR}) : path($ENV{HOME})->child('etc') };
+has 'debug';
 
 =head1 METHODS
 
@@ -41,12 +44,16 @@ has config_dir => sub{ $ENV{COMMON_CONFIG_DIR} ? path($ENV{COMMON_CONFIG_DIR}) :
 sub _get_hypnotoad_config {
     my $self = shift;
     die "Not an object $self" if !ref $self;
-    my $script = basename(shift,'.pl');
+    my $script = shift;
+    my $cfg = shift;
     my $cfile = $self->config_dir->child('hypnotoad.yml');
+    say STDERR "hypnotoad Configfile: $cfile" if $cfg->{debug};
+
  	my $raw_hr = YAML::Tiny->read( $cfile )->[0];
 # 	say Dumper $raw_hr;
  	my $return;
  	$return = $raw_hr->{common_config};
+    $DB::single=2;
  	if (exists $raw_hr->{web_services}->{$script}) {
  		my $tmp = $raw_hr->{web_services}->{$script};
  		for my $key (keys %$tmp) {
@@ -67,7 +74,6 @@ sub _get_hypnotoad_config {
 		$rundir->make_path;
 	}
 	$return->{pid_file} = $rundir->child("$script.pid")->to_string;
-	$DB::single=2;
  	return $return;
 }
 
@@ -81,11 +87,14 @@ Return app config from common config file
 
 sub get_mojoapp_config {
     my $self = shift;
+
     die "Not an object $self" if !ref $self;
-    my $moniker = basename(shift,'.pl');
+    my $filename = shift //confess "Missing script or modulename in input";
+    my $moniker = basename($filename,'.pl');
     my $cfg= shift;
     my $file = $self->config_dir->child('mojoapp.yml')->to_string;
     die "Common config file $file does not exists" if ! -e $file;
+    say STDERR "Configfile: $file" if $cfg->{debug};
  	my $raw_hr =  YAML::Tiny->read( $file)->[0];
  	die "Empty config file in $file: $raw_hr". Dumper $raw_hr if ! ref $raw_hr eq 'HASH';
  	my $return;
@@ -101,7 +110,7 @@ sub get_mojoapp_config {
 	$return->{mojo_log_path} = path($raw_hr->{common_config}->{mojo_log_path})->child("$moniker.log")->to_string;
 	$return->{secrets} = [ split(/[\n\s]+/, path(($ENV{COMMON_CONFIG_DIR}//$ENV{HOME}.'/etc'),'secrets.txt')->slurp ) ];
  	die "No config in $file" if ! $raw_hr;
-	$return->{hypnotoad} = $self->_get_hypnotoad_config($moniker);
+	$return->{hypnotoad} = $self->_get_hypnotoad_config($moniker, $cfg);
  	return $return;
 }
 

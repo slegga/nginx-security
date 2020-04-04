@@ -30,13 +30,18 @@ sub startup {
 
 	#MUST CHANGE WHEN FIXED
 	$self->mode('development');
+	$DB::single=2;
+	my $config =  $self->config;
 
+	if ( scalar keys %{$config} < 3 ) {
+		say STDERR Dumper $config;
+		my $gcc = Model::GetCommonConfig->new;
+		$config = $gcc->get_mojoapp_config($0,{debug=>1});
 
-
-	my $gcc = Model::GetCommonConfig->new;
-	my $config = $gcc->get_mojoapp_config($0);
-
-	$self->config($config);
+		$self->config($config);
+	} else {
+		$config = $self->config;
+	}
 	$self->secrets($config->{secrets});
 	$self->log->path($config->{mojo_log_path});
 	$self->log->info('(Re)Start server');
@@ -49,11 +54,14 @@ sub startup {
 	$self->plugin('Mojolicious::Plugin::Security'); # add helper user, add hook
 	$self->secrets($config->{secrets});
 	$self->helper(users  => sub { state $users = Model::Users->new });
-
-	my $r = $self->routes;
-	$r->get('/logout')->to('login#logout');
-	$r->any('/')->to('login#login')->name('landing_page');
-	$r->any('/login')->to('login#login')->name('landing_page'); # because of login form
+	my $spath= $config->{hypnotoad}->{service_path};
+	if (!$spath) {
+		die Dumper $config;
+	}
+	my $r = $self->routes->under("/$spath");
+	$r->get("/logout")->to('login#logout');
+	$r->any("/")->to('login#login')->name('landing_page');
+	$r->any("/login")->to('login#login')->name('landing_page'); # because of login form
 
 
    $self->helper (is_logged_in => sub {
