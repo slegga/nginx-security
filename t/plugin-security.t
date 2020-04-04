@@ -10,7 +10,7 @@ use Carp::Always;
     my $home = Mojo::Home->new->detect;
     get '/ssl' => sub {
         my $c = shift;
-        return $c->render(json => $c->ssl_info) if $c->user('ssl')->in_storage;
+        return $c->render(text => $c->req->headers->to_string) if $c->user;
         return $c->render(status => 401, text => 'SSL cert NOK');
     };
 }
@@ -25,3 +25,5 @@ $t->get_ok('/ssl', $headers)->status_is(401)->content_is('SSL cert NOK');
 
 #$headers->{'X-SSL-Client-Verified'} = 'SUCCESS';
 $t->get_ok('/ssl', $headers)->status_is(401)->content_is('SSL cert NOK');
+
+done_testing();
