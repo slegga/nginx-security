@@ -111,6 +111,14 @@ sub get_mojoapp_config {
 	$return->{secrets} = [ split(/[\n\s]+/, path(($ENV{COMMON_CONFIG_DIR}//$ENV{HOME}.'/etc'),'secrets.txt')->slurp ) ];
  	die "No config in $file" if ! $raw_hr;
 	$return->{hypnotoad} = $self->_get_hypnotoad_config($moniker, $cfg);
+
+	# get ouath2 google
+	my $oauth_google_fp = $self->config_dir->child('oauth2-google.yml');
+	if (-f $oauth_google_fp) {
+	    $return->{oauth2}->{google} = YAML::Tiny->read("$oauth_google_fp");
+	}
+
+	#return
  	return $return;
 }
 

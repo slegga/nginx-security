@@ -69,11 +69,38 @@ Log out user.
 =cut
 
 sub logout {
-	my $self = shift;
-	$self->session(expires => 1);
-	return	$self->redirect_to('/'.$self->param('base').'/');
+	my $c = shift;
+	$c->session(expires => 1);
+	return	$c->redirect_to('/'.$c->param('base').'/');
 }
 
+=head2 connect_google
 
+Connect with google authentication
+
+=cut
+
+sub connect_google {
+	my $c = shift;
+	my $redirect = $c->tx->req->headers->header('X-Original-URI') || $c->param('redirect_uri');
+    my $get_token_args = {
+        client_id => $c->app->config->{oauth2}->{google}->{ClientID},
+
+        redirect_uri => $redirect,
+        response_type=> 'code',
+        scope=> 'userinfo.email',
+   };
+
+    $c->oauth2->get_token_p(google => $get_token_args)->then(sub {
+        return unless my $provider_res = shift; # Redirct to Facebook
+        $c->session(token => $provider_res->{access_token});
+        my $user = $provider_res->{access_token}->{email};
+        $c->session(user => $user);
+        $c->redirect_to($redirect);
+    })->catch(sub {
+        $c->render("connect", error => shift);
+    });
+
+}
 
 1;

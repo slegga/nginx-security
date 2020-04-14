@@ -8,6 +8,7 @@ use Mojo::JWT;
 use Model::Users;
 use Data::Dumper;
 
+
 =head1 NAME
 
 Login
@@ -52,6 +53,12 @@ sub startup {
 
 	$self->plugin('MyApp::Plugin::Logger');
 	$self->plugin('Mojolicious::Plugin::Security'); # add helper user, add hook
+	if (exists $config->{oauth2}->{google}) {
+        $self->plugin('OAuth2'=> google{
+            key     => $self->config->{oauth2}->{google}->{ClientID},
+            secret  => $self->config->{oauth2}->{google}->{ClientSecret},
+        });
+    }
 	$self->secrets($config->{secrets});
 	$self->helper(users  => sub { state $users = Model::Users->new });
 	my $spath= $config->{hypnotoad}->{service_path};
