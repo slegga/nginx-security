@@ -74,13 +74,13 @@ sub logout {
 	return	$c->redirect_to('/'.$c->param('base').'/');
 }
 
-=head2 connect_google
+=head2 oauth2_google
 
 Connect with google authentication
 
 =cut
 
-sub connect_google {
+sub oauth2_google {
 	my $c = shift;
 	my $redirect = $c->tx->req->headers->header('X-Original-URI') || $c->param('redirect_uri');
     my $get_token_args = {
@@ -94,11 +94,13 @@ sub connect_google {
     $c->oauth2->get_token_p(google => $get_token_args)->then(sub {
         return unless my $provider_res = shift; # Redirct to Facebook
         $c->session(token => $provider_res->{access_token});
-        my $user = $provider_res->{access_token}->{email};
+        my $user = $provider_res->{email};
+        my $redirect = $provider_res->{redirect_uri};
         $c->session(user => $user);
         $c->redirect_to($redirect);
     })->catch(sub {
-        $c->render("connect", error => shift);
+        $c->session(message => 'Connection refused by Google. '. shift);
+        $c->render("login");
     });
 
 }

@@ -69,6 +69,7 @@ sub startup {
 	$r->get("/logout")->to('login#logout');
 	$r->any("/")->to('login#login')->name('landing_page');
 	$r->any("/login")->to('login#login')->name('landing_page'); # because of login form
+	$r->any("/google")->to('login#oauth2_google')->name('landing_page'); # because of login form
 
 
    $self->helper (is_logged_in => sub {
