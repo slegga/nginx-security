@@ -25,7 +25,6 @@ Main loop for Login page.
 
 =cut
 
-
 sub startup {
 	my $self = shift;
 
@@ -54,10 +53,11 @@ sub startup {
 	$self->plugin('MyApp::Plugin::Logger');
 	$self->plugin('Mojolicious::Plugin::Security'); # add helper user, add hook
 	if (exists $config->{oauth2}->{google}) {
-        $self->plugin('OAuth2'=> google{
+        $self->plugin('OAuth2'=> {google => {
             key     => $self->config->{oauth2}->{google}->{ClientID},
             secret  => $self->config->{oauth2}->{google}->{ClientSecret},
-        });
+        } }
+        );
     }
 	$self->secrets($config->{secrets});
 	$self->helper(users  => sub { state $users = Model::Users->new });
