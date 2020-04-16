@@ -86,7 +86,7 @@ sub oauth2_google {
 	if ( $redirect) {
 	    $redirect = path($redirect);
 	} else {
-	    $redirect = $c->url_for()->userinfo(undef)->to_abs->to_string;
+	    $redirect = $c->url_for()->userinfo(undef)->path('/')->to_abs;
 	}
 	if ($redirect->port) {
 	    $redirect->port(undef)->host($c->app->config->{hypnotoad}->{hostname});
