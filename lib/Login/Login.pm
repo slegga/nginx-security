@@ -82,12 +82,20 @@ Connect with google authentication
 
 sub oauth2_google {
 	my $c = shift;
-	my $redirect = $c->tx->req->headers->header('X-Original-URI') || $c->param('redirect_uri');
+	my $redirect = $c->tx->req->headers->header('X-Original-URI') || $c->param('redirect_uri') ;
+	if ( $redirect) {
+	    $redirect = path($redirect);
+	} else {
+	    $redirect = $c->url_for()->userinfo(undef)->to_abs->to_string;
+	}
+	if ($redirect->port) {
+	    $redirect->port(undef)->host($c->app->config->{hypnotoad}->{hostname});
+	}
     my $get_token_args = {
         client_id => $c->app->config->{oauth2}->{google}->{ClientID},
 
-        redirect_uri => $redirect,
-        response_type=> 'code',
+        redirect_uri => "$redirect",
+        # response_type=> 'code',
         scope=> 'userinfo.email',
    };
 
