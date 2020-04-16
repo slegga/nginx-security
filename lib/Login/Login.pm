@@ -82,15 +82,16 @@ Connect with google authentication
 
 sub oauth2_google {
 	my $c = shift;
-	my $redirect = $c->tx->req->headers->header('X-Original-URI') || $c->param('redirect_uri') ;
-	if ( $redirect) {
-	    $redirect = path($redirect);
-	} else {
-	    $redirect = $c->url_for()->userinfo(undef)->path('/')->to_abs;
-	}
-	if ($redirect->port) {
-	    $redirect->port(undef)->host($c->app->config->{hypnotoad}->{hostname})->scheme('https');
-	}
+	#my $redirect = $c->tx->req->headers->header('X-Original-URI') || $c->param('redirect_uri') ;
+	#if ( $redirect) {
+	#    $redirect = path($redirect);
+	#} else {
+	#    $redirect = $c->url_for()->userinfo(undef)->path('/')->to_abs;
+	#}
+	#if ($redirect->port) {
+
+	my  $redirect = $c->url_for()->userinfo(undef)->port(undef)->host($c->app->config->{hypnotoad}->{hostname})->scheme('https')->path('/xlogin/google');
+	#}
     my $get_token_args = {
         client_id => $c->app->config->{oauth2}->{google}->{ClientID},
 
@@ -101,10 +102,13 @@ sub oauth2_google {
 
     $c->oauth2->get_token_p(google => $get_token_args)->then(sub {
         return unless my $provider_res = shift; # Redirct to Facebook
-        $c->session(token => $provider_res->{access_token});
+        $c->session(token => $provider_res->{openid});
         my $user = $provider_res->{email};
-        my $redirect = $provider_res->{redirect_uri};
+
+        $c->session(googledata => $provider_res);
         $c->session(user => $user);
+        my $redirect = $c->session('redirect_to');
+        $c->session('redirect_to'=> undef);
         $c->redirect_to($redirect);
     })->catch(sub {
         $c->session(message => 'Connection refused by Google. '. shift);
