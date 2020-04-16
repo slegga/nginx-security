@@ -89,7 +89,7 @@ sub oauth2_google {
 	    $redirect = $c->url_for()->userinfo(undef)->path('/')->to_abs;
 	}
 	if ($redirect->port) {
-	    $redirect->port(undef)->host($c->app->config->{hypnotoad}->{hostname});
+	    $redirect->port(undef)->host($c->app->config->{hypnotoad}->{hostname})->scheme('https');
 	}
     my $get_token_args = {
         client_id => $c->app->config->{oauth2}->{google}->{ClientID},
