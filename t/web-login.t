@@ -17,7 +17,7 @@ my $user ='marcus';
 $t->post_ok("/$spath"=>form=>{user => $user,pass => 'lulz'})->status_is(200)->content_like(qr'Welcome');
 my $tx = $t->tx;
 #print STDERR Dumper $tx;
-$t->get_ok("/$spath?redirect_uri=/test")->status_is(200);
+$t->get_ok("/$spath?redirect_uri=/test")->status_is(302);
 $t->post_ok("/$spath?redirect_uri=/test"=>form=>{user => 'marcus',pass => 'lulz'})->status_is(302)->content_is('');
 $tx = $t->tx;
 is($tx->res->headers->header('Location'),'/test');

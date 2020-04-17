@@ -33,12 +33,13 @@ sub login {
 	my $self = shift;
 	my $user = $self->param('user') ||'';
 	my $pass = $self->param('pass') || '';
-
-	if (my $redirect = $self->tx->req->headers->header('X-Original-URI') || $self->param('redirect_uri')) {
+    my $redirect;
+	if ($redirect = $self->tx->req->headers->header('X-Original-URI') || $self->param('redirect_uri')) {
 		$self->session(redirect_to => $redirect);
 	}
 
     if ($self->session('user')) {
+    	$self->set_jwt_cookie({user=> $self->session('user'), expires => time +60 });
         return $self->redirect_to($redirect) if $redirect;
         return $self->render('login/landing_page');
     }
