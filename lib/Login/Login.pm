@@ -107,9 +107,11 @@ sub oauth2_google {
     $c->oauth2->get_token_p(google => $get_token_args)->then(sub {
         return unless my $provider_res = shift; # Redirct to Facebook
         $c->session(token => $provider_res->{openid});
-        my ($tmp) = (split('.', $provider_res->{id_token}))[1];
-		my $payload = from_json(decode_base64($tmp));
-        my $user = $payload->{email} if ref $payload;
+        my $tmp = (split('.', $provider_res->{id_token}))[1];
+        my $tmp2 = decode_base64($tmp);
+		my $payload = from_json($tmp2);
+        my $user;
+        $user = $payload->{email} if ref $payload;
 		$c->app->log(warn "payload=".dumper($payload));
 #        delete $tmp->{id_token}; #tar for mye plass i cookie inneholder base64 {"alg":"RS256","kid":"6fcf413224765156b48768a42fac06496a30ff5a","typ":"JWT"}
         $c->session(google_idt => $payload );
