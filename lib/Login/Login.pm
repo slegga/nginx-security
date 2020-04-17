@@ -1,6 +1,7 @@
 package Login::Login;
 use Mojo::Base 'Mojolicious::Controller';
 use Mojo::Log;
+use Clone 'clone';
 my $log = Mojo::Log->new;
 
 =head1 NAME
@@ -104,8 +105,9 @@ sub oauth2_google {
         return unless my $provider_res = shift; # Redirct to Facebook
         $c->session(token => $provider_res->{openid});
         my $user = $provider_res->{email};
-
-        $c->session(googledata => $provider_res);
+		my $tmp = clone $provider_res;
+        delete $tmp->{id_token}; #tar for mye plass i cookie inneholder base64 {"alg":"RS256","kid":"6fcf413224765156b48768a42fac06496a30ff5a","typ":"JWT"}
+        $c->session(googledata => $tmp);
         $c->session(user => $user);
         my $redirect = $c->session('redirect_to');
         $c->session('redirect_to'=> undef);
