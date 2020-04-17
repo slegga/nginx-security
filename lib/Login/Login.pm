@@ -108,6 +108,7 @@ sub oauth2_google {
         return unless my $provider_res = shift; # Redirct to Facebook
         $c->session(token => $provider_res->{openid});
         my $tmp = (split('.', $provider_res->{id_token}))[1];
+#no code here
         my $tmp2 = decode_base64($tmp);
 		my $payload = from_json($tmp2);
         my $user;
