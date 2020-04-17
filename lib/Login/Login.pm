@@ -97,7 +97,7 @@ sub oauth2_google {
 
         redirect_uri => "$redirect",
         # response_type=> 'code',
-        scope => 'https://www.googleapis.com/auth/userinfo.email',
+        scope => 'email',
    };
 
     $c->oauth2->get_token_p(google => $get_token_args)->then(sub {
