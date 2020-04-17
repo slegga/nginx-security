@@ -3,6 +3,7 @@ use Mojo::Base 'Mojolicious::Controller';
 use Mojo::Log;
 use Clone 'clone';
 use MIME::Base64;
+use Mojo::Util 'dumper';
 my $log = Mojo::Log->new;
 
 =head1 NAME
@@ -106,10 +107,11 @@ sub oauth2_google {
         return unless my $provider_res = shift; # Redirct to Facebook
         $c->session(token => $provider_res->{openid});
         my $user = $provider_res->{email};
-		my $id_token = decode_base64($provider_res->{id_token});
-		$c->app->log(warn "id_token=$id_token");
+		my $id_token;
+        push @$id_token, map{decode_base64($_)} split('.', $id_token);
+		$c->app->log(warn "id_token=".dumper($id_token));
 #        delete $tmp->{id_token}; #tar for mye plass i cookie inneholder base64 {"alg":"RS256","kid":"6fcf413224765156b48768a42fac06496a30ff5a","typ":"JWT"}
-        $c->session(google_idt => $id_token;
+        $c->session(google_idt => $id_token);
         $c->session(user => $user);
         my $redirect = $c->session('redirect_to');
         $c->session('redirect_to'=> undef);
