@@ -106,10 +106,10 @@ sub oauth2_google {
 
     $c->oauth2->get_token_p(google => $get_token_args)->then(sub {
         return unless my $provider_res = shift; # Redirct to Facebook
-        $c->session(token => $provider_res->{openid});
+#        $c->session(token => $provider_res->{openid});
 		$c->app->log(warn "id_token=".$provider_res->{id_token});
 
-        my $tmp = (split('.', $provider_res->{id_token}))[1];
+        my $tmp = (split(/\./, $provider_res->{id_token}))[1];
    		$c->app->log(warn "id_tokenno2=".$tmp);
 
 #no code here
