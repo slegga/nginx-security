@@ -38,7 +38,7 @@ sub login {
 		$self->session(redirect_to => $redirect);
 	}
 
-	$self->app->log->info("$user tries to log in");
+	$self->app->log->(info => "$user tries to log in");
 	if(! $self->users->check($user, $pass) ) {
 		if (! $user && !$pass) {
 			return $self->render;
