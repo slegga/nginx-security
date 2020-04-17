@@ -31,14 +31,19 @@ Render login
 
 sub login {
 	my $self = shift;
-	my $user = $self->param('user') || '';
+	my $user = $self->param('user') ||'';
 	my $pass = $self->param('pass') || '';
 
 	if (my $redirect = $self->tx->req->headers->header('X-Original-URI') || $self->param('redirect_uri')) {
 		$self->session(redirect_to => $redirect);
 	}
 
-	$self->app->log->(info => "$user tries to log in");
+    if ($self->session('user')) {
+        return $self->redirect_to($redirect) if $redirect;
+        return $self->render('login/landing_page');
+    }
+
+	$self->app->log->info( "$user tries to log in");
 	if(! $self->users->check($user, $pass) ) {
 		if (! $user && !$pass) {
 			return $self->render;
