@@ -126,7 +126,6 @@ sub oauth2_google {
         $user = $payload->{email} if ref $payload;
 		$c->app->log->warn( "payload=".dumper($payload));
 #        delete $tmp->{id_token}; #tar for mye plass i cookie inneholder base64 {"alg":"RS256","kid":"6fcf413224765156b48768a42fac06496a30ff5a","typ":"JWT"}
-        $c->session(google_idt => $payload );
         $c->session(user => $user);
         my $redirect = $c->session('redirect_to');
         $c->session('redirect_to'=> undef);
