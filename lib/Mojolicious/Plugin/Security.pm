@@ -79,8 +79,24 @@ Read $app->config->{hypnotoad}->{service_path} and adjust urls.
 
 has 'main_module_name';
 has config => sub {Model::GetCommonConfig->new->get_mojoapp_config(shift->main_module_name||$0)};
+has 'accepted_groups' => sub{[]};
 
 =head1 HELPERS
+
+
+=head2 is_authorized
+
+Check authorisation. Check users group with authorized groups and return 1 if matching group is found.
+
+=cut
+
+sub is_authorized {
+    my ($self, $c) =@_;
+    for my $g(@{$self->authorized_groups}) {
+        return 1  if grep {$g eq $_}$self->user($c)->{groups};
+    }
+    return; #unauthorized
+}
 
 =head2 unauthenticated
 
