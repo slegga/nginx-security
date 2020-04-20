@@ -45,7 +45,7 @@ sub login {
     }
 
 	$self->app->log->info( "$user tries to log in");
-	if(! $self->users->check($user, $pass) ) {
+	if(! $self->check($user, $pass) ) {
 		if (! $user && !$pass) {
 			return $self->render;
 		}

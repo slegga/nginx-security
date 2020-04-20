@@ -5,7 +5,6 @@ use lib "$FindBin::Bin/../../utilities-perl/lib";
 use SH::UseLib;
 use Model::GetCommonConfig;
 use Mojo::JWT;
-use Model::Users;
 use Data::Dumper;
 
 
@@ -60,7 +59,6 @@ sub startup {
         );
     }
 	$self->secrets($config->{secrets});
-	$self->helper(users  => sub { state $users = Model::Users->new });
 	my $spath= $config->{hypnotoad}->{service_path};
 	if (!$spath) {
 		die Dumper $config;

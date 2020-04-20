@@ -2,6 +2,8 @@ use Test::More;
 use Test::Mojo;
 use Carp::Always;
 
+$ENV{COMMON_CONFIG_DIR} ='t/etc';
+
 {
     use Mojolicious::Lite;
 
@@ -20,10 +22,9 @@ my $headers = {};
 diag 'ssl';
 $t->get_ok('/ssl')->status_is(401)->content_is('SSL cert NOK');
 my $headers={};
-#$headers->{'X-SSL-Client-Verified'} = 'FAILED';
 $t->get_ok('/ssl', $headers)->status_is(401)->content_is('SSL cert NOK');
 
-#$headers->{'X-SSL-Client-Verified'} = 'SUCCESS';
-$t->get_ok('/ssl', $headers)->status_is(401)->content_is('SSL cert NOK');
+$headers->{'X-Common-Name'} = 'deadly';
+$t->get_ok('/ssl', $headers)->status_is(200)->content_like(qr'deadly');
 
 done_testing();

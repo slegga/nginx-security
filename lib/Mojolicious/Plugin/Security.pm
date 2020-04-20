@@ -5,6 +5,7 @@ use Mojo::JSON 'j';
 use Data::Dumper;
 use Mojo::JWT;
 use Mojo::JSON 'j';
+use FindBin;
 
 use Mojo::File 'path';
 my $lib;
@@ -22,7 +23,7 @@ BEGIN {
 use lib $lib;
 use SH::UseLib;
 use Model::GetCommonConfig;
-use Model::Users;
+
 
 
 =encoding utf8
@@ -79,24 +80,23 @@ Read $app->config->{hypnotoad}->{service_path} and adjust urls.
 
 has 'main_module_name';
 has config => sub {Model::GetCommonConfig->new->get_mojoapp_config(shift->main_module_name||$0)};
-has 'accepted_groups' => sub{[]};
+has 'authorized_groups' => sub{[]};
+has users => sub {
+    my $users;
+    my $userfile = $ENV{COMMON_CONFIG_DIR}||$ENV{MOJO_CONFIG}||"$FindBin::Bin/../../../etc";
+    $userfile .= "/users.yml";
+    # warn $userfile;
+    die "Missing users.yml file $userfile. Please add" if (! -r $userfile );
+    my $tmp = YAML::Tiny->read( $userfile );
+    $users = $tmp->[0]->{users};
+    for my $k(%$users) {
+        $users->{$k}->{username} = $k;
+    }
+    return $users;
+};
+
 
 =head1 HELPERS
-
-
-=head2 is_authorized
-
-Check authorisation. Check users group with authorized groups and return 1 if matching group is found.
-
-=cut
-
-sub is_authorized {
-    my ($self, $c) =@_;
-    for my $g(@{$self->authorized_groups}) {
-        return 1  if grep {$g eq $_}$self->user($c)->{groups};
-    }
-    return; #unauthorized
-}
 
 =head2 unauthenticated
 
@@ -124,7 +124,7 @@ sub url_logout {
 
 =head2 user
 
-Return user object if logged in. Else return undef.
+Return Model::User object if sucess. Else return undef.
 
 =cut
 
@@ -136,11 +136,12 @@ sub user {
 	my $headers = $c->tx->req->headers;
 
 	#GET USER
-	my $user = $c->session('user'); # User is already authenticated
-	if (!$user) { # Set by nginx, client certificate
-		$user = $headers->header('X-Common-Name');
+	my $username = $c->session('user'); # User is already authenticated
+	if (!$username) { # Set by nginx, client certificate
+		$username = $headers->header('X-Common-Name');
+        return $self->users->{$username} if $username;
 	}
-	if (!$user) { # Set user with ss0-jwt-token
+	if ( !$username) { # Set user with ss0-jwt-token
 		if (my $jwt = $c->cookie('sso-jwt-token') ) {
 			my $claims;
 			eval {
@@ -148,7 +149,7 @@ sub user {
 			} or $c->app->log->error('Did not manage to validate jwt "'.$jwt.'" '.$!.' '.$@. "secret: ". $c->app->secrets->[0]);
 			if ($claims) {
 				$c->app->log->info('claims is '.j($claims));
-				$user = $claims->{user};
+				$username = $claims->{user};
 				$c->tx->res->cookie('sso-jwt-token'=>'');
 			} else {
 				say STDERR 'Got jwt but no claims jwt:'. $jwt;
@@ -162,11 +163,11 @@ sub user {
 	}
 
     #HANDLE USER SET
-	if ( $user ) {
-        $c->req->env->{identity} = $user;
-        $c->session->{user} = $user;
-        $c->res->headers->header( 'X-User', $user );
-        return  Model::Users->new({user => $user});
+	if ( $username ) {
+        $c->req->env->{identity} = $username;
+        $c->session->{user} = $username;
+        $c->res->headers->header( 'X-User', $username );
+        return $self->users->{$username};
 	}
     $c->app->log->warn("Not authenticated.");
     $c->app->log->warn("Reqest Headers:\n". $c->req->headers->to_string);
@@ -175,6 +176,79 @@ sub user {
 	return;
 
 }
+
+=head2 check
+
+Check username and password of totp.
+
+=cut
+
+sub check {
+  my ($self, $c, $user, $pass) = @_;
+#  $self->log->warn("$user tries to log in");
+  # Success
+  die"Missing password" if ! $pass;
+ if (my $u =  $self->users->{$user}) {
+    if ($u->{type} eq 'password') {
+        return 1 if (secure_compare($pass,$u->{secret}));
+    } elsif ($u->{type} eq 'totp') {
+        my $oath = Authen::OATH->new;
+	die if ! length($u->{secret});
+        my $bytes = decode_base32( $u->{secret} );
+        my $correct_otp = $oath->totp($bytes);
+	my $delay_otp     = $oath->totp($bytes, time()-30);
+        $correct_otp=sprintf("%06d",$correct_otp);
+        warn $correct_otp,"\n";
+        if (secure_compare($pass,$correct_otp) || secure_compare($pass, $delay_otp)) {
+#		$self->log->warn("$user has successfully logged in");
+		return 1;
+	} else {
+#		$self->log->warn("$user has wrong password");
+		return;
+	}
+    } else {
+        die "Unkown type";
+    }
+  }
+  # Fail
+  return;
+}
+
+=head2 is_authorized
+
+Check authorisation. Check users group with authorized groups and return 1 if matching group is found.
+
+=cut
+
+sub is_authorized {
+    my ($self, $c) =@_;
+    my $user_hr = $self->user($c);
+    if (! $user_hr) {
+        $c->log->error("User has not logged in. Authenticate before authorize.");
+        return;
+    }
+    for my $g(@{$self->authorized_groups}) {
+        return 1  if grep {$g eq $_} @{$self->user($c)->{groups}};
+    }
+    return; #unauthorized
+}
+
+
+#=head2 padd5
+
+#Padd for TOPT
+
+#=cut
+
+#sub _padd5 {
+#    my $token = shift;
+#    while (length $token < 6) {
+#        $token = "0$token";
+#    }
+#    return $token;
+#}
+
+
 
 =head2 register
 
@@ -186,11 +260,12 @@ sub register {
   	my ( $self, $app, $attributes ) = @_;
 
 	# Register helpers
-	for my $h(qw/user unauthenticated url_logout/ ) {
+	for my $h(qw/is_authorized check unauthenticated url_logout user/ ) {
     	$app->helper($h => sub {$self->$h(@_)});
 	}
     for my $key (keys %$attributes) {
         $self->$key($attributes->{$key});
     }
 }
+
 1;

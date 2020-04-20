@@ -4,13 +4,14 @@ use Mojo::Base -strict;
 use Mojo::File 'path';
 use Carp::Always;
 use Mojo::JWT;
+use Mojo::Util 'secure_compare';
 use lib '.';
 $ENV{COMMON_CONFIG_DIR} ='t/etc';
 my $secret = (split(/[\n\s]+/,path($ENV{COMMON_CONFIG_DIR},'secrets.txt')->slurp))[0];
 diag '$secret = '.$secret;
 my $t = Test::Mojo->new(Mojo::File->new('script/web-nginx-guard.pl'));
 is($t->app->secrets->[0], $secret);
-my $jwt = Mojo::JWT->new(claims=>{user=>'adoer',expires => time + 60},secret=>$secret)->encode;
+my $jwt = Mojo::JWT->new(claims=>{user=>'admin',expires => time + 60},secret=>$secret)->encode;
 
 $t->get_ok('/')->status_is(401);
 
