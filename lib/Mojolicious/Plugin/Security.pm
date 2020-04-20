@@ -194,7 +194,6 @@ sub check {
 #  $self->log->warn("$user tries to log in");
   # Success
  # warn "user = $user";
-  die"Missing password" if ! $pass;
  if (my $u =  $self->users->{$user}) {
     if ($u->{type} eq 'password') {
         return 1 if (secure_compare($pass,$u->{secret}));
