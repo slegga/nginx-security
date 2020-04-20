@@ -3,7 +3,6 @@ use Test::Mojo;
 use Mojo::Base -strict;
 use Mojo::File 'path';
 use Carp::Always;
-use lib '.';
 use Data::Dumper;
 use Model::GetCommonConfig;
 $ENV{COMMON_CONFIG_DIR} ='t/etc';
@@ -15,7 +14,6 @@ my $t = Test::Mojo->new('Login',$cfg); #Mojo::File->new('script/web-login.pl'),{
 $t->get_ok("/$spath")->status_is(200);
 my $user ='admin';
 $t->post_ok("/$spath"=>form=>{user => $user,pass => 'lulz'})->status_is(200)->content_like(qr'Welcome');
-__END__
 my $tx = $t->tx;
 #print STDERR Dumper $tx;
 $t->get_ok("/$spath?redirect_uri=/test")->status_is(302);

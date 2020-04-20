@@ -43,8 +43,8 @@ sub login {
         return $self->redirect_to($redirect) if $redirect;
         return $self->render('login/landing_page');
     }
-
 	$self->app->log->info( "$user tries to log in");
+	return $self->render if ! $pass;
 	if(! $self->check($user, $pass) ) {
 		if (! $user && !$pass) {
 			return $self->render;

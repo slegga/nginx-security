@@ -6,6 +6,10 @@ use Data::Dumper;
 use Mojo::JWT;
 use Mojo::JSON 'j';
 use FindBin;
+use Mojo::Util 'secure_compare';
+use Authen::OATH;
+use Convert::Base32;
+use YAML::Tiny;
 
 use Mojo::File 'path';
 my $lib;
@@ -24,6 +28,8 @@ use lib $lib;
 use SH::UseLib;
 use Model::GetCommonConfig;
 
+use Carp::Always;
+
 
 
 =encoding utf8
@@ -32,7 +38,7 @@ use Model::GetCommonConfig;
 
 Mojolicious::Plugin::Security
 
-=head1 SYNOPSIS
+=head1 SYNOPSISG
 
 	package MyApp;
 	use Mojo::Base 'Mojolicious';
@@ -184,9 +190,10 @@ Check username and password of totp.
 =cut
 
 sub check {
-  my ($self, $c, $user, $pass) = @_;
+  my ($self, $c,$user, $pass) = @_;
 #  $self->log->warn("$user tries to log in");
   # Success
+ # warn "user = $user";
   die"Missing password" if ! $pass;
  if (my $u =  $self->users->{$user}) {
     if ($u->{type} eq 'password') {
