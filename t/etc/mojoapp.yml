@@ -1,5 +1,6 @@
 common_config:
   mojo_log_path: t/playground
+  login_path: /xlogin
 web_services:
     Login:
       accesslogfile: t/playground/login-access.log

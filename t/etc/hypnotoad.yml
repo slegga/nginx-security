@@ -12,6 +12,10 @@ web_services:
         port: 8102
         security_level: public
         service_path: xlogin
+    web-login.t:
+        repo: nginx-security
+        port: 42
+        security_level: public
     GetCommonConfig.t:
         repo: nginx-security
         port: 42

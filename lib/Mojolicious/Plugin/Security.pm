@@ -124,7 +124,7 @@ sub unauthenticated {
 
 sub url_logout {
     my ($self,$c,$format) = @_;
-    die if ! $self->config->{login_path};
+    die "Missing login_path in mojoapp.yml" if ! $self->config->{login_path};
     return Mojo::URL->new($self->config->{login_path}.'/logout')->to_abs;
 }
 
