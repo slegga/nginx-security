@@ -81,7 +81,7 @@ Log out user.
 sub logout {
 	my $c = shift;
 	$c->session(expires => 1);
-	return	$c->redirect_to('/'.$c->param('base').'/');
+	return	$c->redirect_to('/'.$c->config->{hypnotoad}->{service_path};
 }
 
 =head2 oauth2_google
