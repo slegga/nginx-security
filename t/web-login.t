@@ -26,7 +26,7 @@ my $jwt = Mojo::JWT->new(claims=>{user=>$user,expires => time + 60},secret=>$sec
 is($tx->res->cookie('sso-jwt-token')->value,$jwt,'Cookie as expected') ;
 my $lo = $t->app->build_controller->url_logout;
 is($lo, '/xlogin/logout','Correct path for logout');
-$t->get_ok($lo)->status_is(200);
+$t->get_ok("/$spath/logout")->status_is(302)->header_is('Location'=>'/xlogin');
 
 done_testing();
 
