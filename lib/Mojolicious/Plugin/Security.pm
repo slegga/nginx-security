@@ -111,9 +111,24 @@ Redirects to login page
 =cut
 
 sub unauthenticated {
-    my ($self,$c,$format) = @_;
+    my ($self,$c) = @_;
     my $url = Mojo::URL->new($self->config->{login_path}.'/login')->query(redirect_uri => $c->url_for);
     $c->redirect_to($url);
+    return undef; ##no critic
+
+}
+
+=head2 unauthorized
+
+Return standard webpage when trying to access restricted pages
+
+=cut
+
+sub unauthorized {
+    my ($self,$c) = @_;
+#    my $url = Mojo::URL->new($self->config->{login_path}.'/login')->query(redirect_uri => $c->url_for);
+#    $c->redirect_to($url);
+    $c->render(text => 'You are not authorized to view this page. Contact the webmaster. Your username is '.$c->user->{username}. ' Your groups are '.join (',',@{$c->user->{groups}}). '. You need: ' .join(',',@{$self->authorized_groups}));
     return undef; ##no critic
 
 }
@@ -138,14 +153,14 @@ Like url_for, but return expected url with configured base path. Return string.
 
 sub url_abspath {
     my ($self,$c,$local_path) = @_;
-    warn $c->config->{hypnotoad}->{service_path};
+#    warn $c->config->{hypnotoad}->{service_path};
     my $return = $c->url_for->path->parts([$c->config->{hypnotoad}->{service_path}, $local_path]);
     return $return;
 }
 
 =head2 user
 
-Return Model::User object if sucess. Else return undef.
+Return user-hash ref {username=>'xyz', groups=>['all']} object if sucess. Else return undef.
 
 =cut
 
@@ -281,7 +296,7 @@ sub register {
   	my ( $self, $app, $attributes ) = @_;
 
 	# Register helpers
-	for my $h(qw/is_authorized check unauthenticated url_logout url_abspath user/ ) {
+	for my $h(qw/is_authorized check unauthenticated unauthorized url_logout url_abspath user/ ) {
     	$app->helper($h => sub {$self->$h(@_)});
 	}
     for my $key (keys %$attributes) {
