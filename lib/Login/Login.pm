@@ -34,7 +34,7 @@ sub login {
 	my $user = $self->param('user') ||'';
 	my $pass = $self->param('pass') || '';
     my $redirect;
-	if ($redirect = $self->tx->req->headers->header('X-Original-URI') || $self->param('redirect_uri')) {
+	if ($redirect = $self->param('redirect_uri')) {
 		$self->session(redirect_to => $redirect);
 	}
 
