@@ -262,6 +262,7 @@ sub is_authorized {
         $c->log->error("User has not logged in. Authenticate before authorize.");
         return;
     }
+    return 1 if ! $self->authorized_groups || ! @{$self->authorized_groups}; # all are welcome
     for my $g(@{$self->authorized_groups}) {
         return 1  if grep {$g eq $_} @{$self->user($c)->{groups}};
     }
