@@ -120,12 +120,27 @@ sub unauthenticated {
 
 =head2 url_logout
 
+Return logout link as Mojo::URL
+
 =cut
 
 sub url_logout {
-    my ($self,$c,$format) = @_;
+    my ($self,$c) = @_;
     die "Missing login_path in mojoapp.yml" if ! $self->config->{login_path};
     return Mojo::URL->new($self->config->{login_path}.'/logout')->to_abs;
+}
+
+=head2 url_abspath
+
+Like url_for, but return expected url with configured base path. Return string.
+
+=cut
+
+sub url_abspath {
+    my ($self,$c,$local_path) = @_;
+    warn $c->config->{hypnotoad}->{service_path};
+    my $return = $c->url_for->path->parts([$c->config->{hypnotoad}->{service_path}, $local_path]);
+    return $return;
 }
 
 =head2 user
@@ -266,7 +281,7 @@ sub register {
   	my ( $self, $app, $attributes ) = @_;
 
 	# Register helpers
-	for my $h(qw/is_authorized check unauthenticated url_logout user/ ) {
+	for my $h(qw/is_authorized check unauthenticated url_logout url_abspath user/ ) {
     	$app->helper($h => sub {$self->$h(@_)});
 	}
     for my $key (keys %$attributes) {
