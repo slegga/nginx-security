@@ -25,7 +25,7 @@ Loging module. Handle login request.
 
 =head2 login
 
-Render login
+Render login with passowrd. Has google OAuth2 link.
 
 =cut
 
@@ -43,14 +43,13 @@ sub login {
         return $self->redirect_to($redirect) if $redirect;
         return $self->render('login/landing_page');
     }
+    return $self->render if ! $user ||! $pass;
+
 	$self->app->log->info( "$user tries to log in");
-	return $self->render if ! $pass;
+
 	if(! $self->check($user, $pass) ) {
-		if (! $user && !$pass) {
-			return $self->render;
-		}
 		$self->app->log->warn("Cookie mojolicious: ". ($self->cookie('mojolicious')//'__UNDEF__'));
-		$DB::single=2;
+#		$DB::single=2;
 		$self->app->log->warn("$user is NOT logged in");
 		$self->session(message => 'Wrong user or password');
 		return $self->render;
