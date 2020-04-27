@@ -5,6 +5,8 @@ use Clone 'clone';
 use MIME::Base64;
 use Mojo::Util 'dumper';
 use Mojo::JSON 'from_json';
+use Mojo::SQLite;
+use UUID 'uuid';
 my $log = Mojo::Log->new;
 
 =head1 NAME
@@ -29,19 +31,26 @@ Render login with passowrd. Has google OAuth2 link.
 
 =cut
 
+has db => sub {Mojo::SQLite->new(shift->config->{login_db_dir}. '/session_store.db')->db};
+
 sub login {
 	my $self = shift;
-	my $user = $self->param('user') ||'';
-	my $pass = $self->param('pass') || '';
+	my $user =    $self->param('user') ||'';
+	my $pass =    $self->param('pass') || '';
+	my $message = $self->param('pass') || '';
     my $redirect;
 	if ($redirect = $self->param('redirect_uri')) {
 		$self->session(redirect_to => $redirect);
 	}
 
-    if ($self->session('user')) {
-    	$self->set_jwt_cookie({user=> $self->session('user'), expires => time +60 });
-        return $self->redirect_to($redirect) if $redirect;
-        return $self->render('login/landing_page');
+    if ($self->session('sid')) {
+        if ( my $res = $self->db->query('select user from sessions where status=? and sid =?','active',$self->session('sid') ) ) {
+            if ($user = $res->hash->{user}) {
+            	$self->set_jwt_cookie({user=> $user, expires => time +60 });
+                return $self->redirect_to($redirect) if $redirect;
+                return $self->render('login/landing_page');
+            }
+        }
     }
     return $self->render if ! $user ||! $pass;
 
@@ -57,15 +66,17 @@ sub login {
 
 	$self->app->log->info("$user logs in");
 
-	$self->session(user => $user);
-	$self->set_jwt_cookie({user=> $user, expires => time +60 });
+    my $sid = uuid();
+	$self->session(sid=> $sid);
+	$self->set_jwt_cookie({sid=>$sid, expires => time +60 });
+	$self->db->insert('sessions',{sid=>$sid, user => $user, status =>'active', expires => time + 60 * 90 } );
 	if (my $redirect = $self->session('redirect_to')) {
 		$self->app->log->warn("Redirect to $redirect");
 		$self->session('redirect_to' => undef); # remove redirect for later reloging
 		return $self->redirect_to($redirect);
 	}
 	$self->session(message => '');
-	$self->app->log->warn('Render landing for '.$self->session->{user});
+	$self->app->log->warn('Render landing for '.$user);
 	return $self->render('login/landing_page');
 
 }
@@ -79,7 +90,10 @@ Log out user.
 
 sub logout {
 	my $c = shift;
+	my $sid = $c->session('sid');
+	$c->db->update('sessions',{ status =>'expired',expires =>time },{sid=>$sid} );
 	$c->session(expires => 1);
+	
 	return	$c->redirect_to('/'.$c->config->{hypnotoad}->{service_path});
 }
 

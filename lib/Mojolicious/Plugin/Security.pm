@@ -140,6 +140,7 @@ Return logout link as Mojo::URL
 
 sub url_logout {
     my ($self,$c) = @_;
+    $c->session(expires=>1);
     die "Missing login_path in mojoapp.yml" if ! $self->config->{login_path};
     return Mojo::URL->new($self->config->{login_path}.'/logout')->to_abs;
 }
@@ -171,7 +172,11 @@ sub user {
 	my $headers = $c->tx->req->headers;
 
 	#GET USER
-	my $username = $c->session('user'); # User is already authenticated
+	my $username;
+	my $sid = $c->session('sid'); # User is already authenticated
+	if ($sid) {
+        $username = $self->db->query('select user from sessions where status = ?  and sid = ?','active', $sid)->hash->{user};
+	}
 	if (!$username) { # Set by nginx, client certificate
 		$username = $headers->header('X-Common-Name');
         return $self->users->{$username} if $username;
@@ -206,7 +211,6 @@ sub user {
 	}
     $c->app->log->warn("Not authenticated.");
     $c->app->log->warn("Reqest Headers:\n". $c->req->headers->to_string);
-    $c->app->log->warn("Cookie sso-jwt-token: ". ($c->cookie('sso-jwt-token')//'__UNDEF__'));
 
 	return;
 
