@@ -13,11 +13,12 @@ my $SECRET = (split(/[\s\n]/, $tmp))[0];
 my $db = Mojo::SQLite->new($ENV{COMMON_CONFIG_DIR}.'/session_store.db')->db;
 $db->query($_) for split(/\;/, path('sql/table_defs.sql')->slurp);
 
-sub jwt_cookie {
+sub generate_jwt {
     my $claims = shift;
 
-    my $jwt = Mojo::JWT->new(claims => $claims, secret => $SECRET)->encode;
-    return Mojo::Cookie::Request->new({name=>'sso-jwt-token', value =>$jwt});
+    #my $jwt =
+    return Mojo::JWT->new(claims => $claims, secret => $SECRET)->encode;
+#    return Mojo::Cookie::Request->new({name=>'sso-jwt-token', value =>$jwt});
 };
 
 {
@@ -47,13 +48,17 @@ $headers->{'X-Common-Name'} = 'deadly';
 $t->get_ok('/request', $headers)->status_is(200)->content_like(qr'deadly');
 
 diag 'jwt';
-my $tx = $t->tx;
-my $cookie = jwt_cookie({sid=>'123'});
-say $cookie;
-push @{$tx->req->cookies}, $cookie;
-$headers={'Set-Cookie' => "$cookie"};
-$t->tx($tx);
-$t->get_ok('/request',$headers)->status_is(200)->content_like(qr'deadly');
+$headers={};
+#my $tx = $t->tx;
+my $tx = $t->ua->build_tx(JWT => '/request');
+my $jwt = generate_jwt({sid=>'123'});
+
+$tx->req->cookies({name => 'sso-jwt-token', value => $jwt});
+#say $cookie;
+#push @{$tx->req->cookies}, $cookie;
+#$headers={'Set-Cookie' => "$cookie"};
+#$t->tx($tx);
+$t->request_ok($tx)->status_is(200);#->content_like(qr'deadly');#->content_is('');
 
 
 # utility functions;
