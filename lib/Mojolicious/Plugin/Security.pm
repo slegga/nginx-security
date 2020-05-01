@@ -165,7 +165,7 @@ Return user-hash ref {username=>'xyz', groups=>['all']} object if sucess. Else r
 =cut
 
 sub user {
-    say STDERR $_ for @_;
+    say STDERR "USER:$_" for @_;
     my $self = shift;
 	my $c   = shift;  # Mojolicious::Controller
 
@@ -183,6 +183,8 @@ sub user {
 	}
 	if ( !$username) { # Set user with ss0-jwt-token
 		if (my $jwt = $c->cookie('sso-jwt-token') ) {
+			say STDERR 'Got jwt:'. $jwt;
+            say STDERR "SECRETX ". $c->app->secrets->[0];
 			my $claims;
 			eval {
 				$claims = Mojo::JWT->new(secret => $c->app->secrets->[0])->decode($jwt);
@@ -261,6 +263,7 @@ Check authorisation. Check users group with authorized groups and return 1 if ma
 
 sub is_authorized {
     my ($self, $c) =@_;
+    $DB::single=2;
     my $user_hr = $self->user($c);
     if (! $user_hr) {
         $c->log->error("User has not logged in. Authenticate before authorize.");

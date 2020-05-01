@@ -5,13 +5,16 @@ use Carp::Always;
 use Mojo::File 'path';
 use Mojo::SQLite;
 use Mojo::JWT;
+use DBIx::TempDB;
+use lib;
 
 $ENV{COMMON_CONFIG_DIR} ='t/etc';
 my $tmp = path($ENV{COMMON_CONFIG_DIR})->child('secrets.txt')->slurp;
-
 my $SECRET = (split(/[\s\n]/, $tmp))[0];
+say STDERR $SECRET;
 my $db = Mojo::SQLite->new($ENV{COMMON_CONFIG_DIR}.'/session_store.db')->db;
 $db->query($_) for split(/\;/, path('sql/table_defs.sql')->slurp);
+$db->insert('sessions',{});
 
 sub generate_jwt {
     my $claims = shift;
@@ -25,10 +28,12 @@ sub generate_jwt {
     use Mojolicious::Lite;
 
 #    plugin 'RequestBase';
-    plugin 'Security';
+    plugin 'Mojolicious::Plugin::Security';
+    app->secrets([$SECRET]);
     my $home = Mojo::Home->new->detect;
     get '/request' => sub {
         my $c = shift;
+        $DB::single=2;
         return $c->render(text => $c->req->headers->to_string) if $c->user;
         return $c->render(status => 401, text => 'Request NOT OK');
     };
@@ -50,7 +55,7 @@ $t->get_ok('/request', $headers)->status_is(200)->content_like(qr'deadly');
 diag 'jwt';
 $headers={};
 #my $tx = $t->tx;
-my $tx = $t->ua->build_tx(JWT => '/request');
+my $tx = $t->ua->build_tx(GET => '/request');
 my $jwt = generate_jwt({sid=>'123'});
 
 $tx->req->cookies({name => 'sso-jwt-token', value => $jwt});
