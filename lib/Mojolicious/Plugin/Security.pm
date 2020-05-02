@@ -100,7 +100,7 @@ has users => sub {
     }
     return $users;
 };
-
+has db => sub {Mojo::SQLite->new(shift->config->{login_db_dir}. '/session_store.db')->db};
 
 =head1 HELPERS
 
@@ -191,7 +191,9 @@ sub user {
 			} or $c->app->log->error('Did not manage to validate jwt "'.$jwt.'" '.$!.' '.$@. "secret: ". $c->app->secrets->[0]);
 			if ($claims) {
 				$c->app->log->info('claims is '.j($claims));
-				$username = $claims->{user};
+				$sid = $claims->{sid};
+                $username = $self->db->query('select username from sessions where status = ?  and sid = ?','active', $sid)->hash->{user};
+
 				$c->tx->res->cookie('sso-jwt-token'=>'');
 			} else {
 				say STDERR 'Got jwt but no claims jwt:'. $jwt;

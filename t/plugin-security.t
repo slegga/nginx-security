@@ -5,7 +5,6 @@ use Carp::Always;
 use Mojo::File 'path';
 use Mojo::SQLite;
 use Mojo::JWT;
-use DBIx::TempDB;
 use lib;
 
 $ENV{COMMON_CONFIG_DIR} ='t/etc';
@@ -14,7 +13,7 @@ my $SECRET = (split(/[\s\n]/, $tmp))[0];
 say STDERR $SECRET;
 my $db = Mojo::SQLite->new($ENV{COMMON_CONFIG_DIR}.'/session_store.db')->db;
 $db->query($_) for split(/\;/, path('sql/table_defs.sql')->slurp);
-$db->insert('sessions',{});
+$db->insert('sessions',{sid=>123,username=>'bodil'});
 
 sub generate_jwt {
     my $claims = shift;

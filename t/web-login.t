@@ -7,6 +7,8 @@ use Data::Dumper;
 use Model::GetCommonConfig;
 $ENV{COMMON_CONFIG_DIR} ='t/etc';
 $ENV{TEST_INSECURE_COOKIES}=1;
+my $db = Mojo::SQLite->new($ENV{COMMON_CONFIG_DIR}.'/session_store.db')->db;
+$db->query($_) for split(/\;/, path('sql/table_defs.sql')->slurp);
 
 my $cfg = Model::GetCommonConfig->new->get_mojoapp_config('Login');
 my $spath = $cfg->{hypnotoad}->{service_path};
