@@ -105,21 +105,12 @@ Connect with google authentication
 
 sub oauth2_google {
 	my $c = shift;
-	#my $redirect = $c->tx->req->headers->header('X-Original-URI') || $c->param('redirect_uri') ;
-	#if ( $redirect) {
-	#    $redirect = path($redirect);
-	#} else {
-	#    $redirect = $c->url_for()->userinfo(undef)->path('/')->to_abs;
-	#}
-	#if ($redirect->port) {
 
 	my  $redirect = $c->url_for()->userinfo(undef)->port(undef)->host($c->app->config->{hypnotoad}->{hostname})->scheme('https')->path('/xlogin/google');
 	#}
     my $get_token_args = {
         client_id => $c->app->config->{oauth2}->{google}->{ClientID},
-
         redirect_uri => "$redirect",
-        # response_type=> 'code',
         scope => 'email',
    };
 
@@ -135,11 +126,23 @@ sub oauth2_google {
         my $tmp2 = decode_base64($tmp);
    		$c->app->log->warn( "id_tokenno2decoded=".$tmp2);
 		my $payload = from_json($tmp2);
-        my $user;
-        $user = $payload->{email} if ref $payload;
+        my $username;
+        $username = $payload->{email} if ref $payload;
 		$c->app->log->warn( "payload=".dumper($payload));
 #        delete $tmp->{id_token}; #tar for mye plass i cookie inneholder base64 {"alg":"RS256","kid":"6fcf413224765156b48768a42fac06496a30ff5a","typ":"JWT"}
-        $c->session(user => $user);
+        $c->session(user => $username);
+            my $sid = uuid();
+
+    	$c->session(sid=> $sid);
+    	$c->set_jwt_cookie({sid=>$sid, expires => time +60 });
+    	$c->db->insert('sessions',{sid=>$sid, username => $username, status =>'active', expires => time + 60 * 90 } );
+    	if (my $redirect = $c->session('redirect_to')) {
+    		$c->app->log->warn("Redirect to $redirect");
+    		$c->session('redirect_to' => undef); # remove redirect for later reloging
+    		return $c->redirect_to($redirect);
+    	}
+    	$c->session(message => '');
+
         my $redirect = $c->session('redirect_to');
         $c->session('redirect_to'=> undef);
         $c->redirect_to($redirect);
