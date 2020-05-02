@@ -45,10 +45,12 @@ sub login {
 
     if (my $sid = $self->session('sid')) {
         if ( my $res = $self->db->query('select username from sessions where status=? and sid =?','active',$sid ) ) {
-            if ($username = $res->hash->{username}) {
-            	$self->set_jwt_cookie({sid=> $sid, expires => time +60 });
-                return $self->redirect_to($redirect) if $redirect;
-                return $self->render('login/landing_page');
+            if(my $h = $res->hash ) {
+                if ($username = $h->{username}) {
+                	$self->set_jwt_cookie({sid=> $sid, expires => time +60 });
+                    return $self->redirect_to($redirect) if $redirect;
+                    return $self->render('login/landing_page');
+                }
             }
         }
     }
