@@ -11,7 +11,12 @@ my $secret = (split(/[\n\s]+/,path($ENV{COMMON_CONFIG_DIR},'secrets.txt')->slurp
 diag '$secret = '.$secret;
 my $t = Test::Mojo->new(Mojo::File->new('script/web-nginx-guard.pl'));
 is($t->app->secrets->[0], $secret);
-my $jwt = Mojo::JWT->new(claims=>{user=>'admin',expires => time + 60},secret=>$secret)->encode;
+
+my $db = Mojo::SQLite->new($ENV{COMMON_CONFIG_DIR}.'/session_store.db')->db;
+$db->query($_) for split(/\;/, path('sql/table_defs.sql')->slurp);
+$db->insert('sessions',{sid=>'123', username=>'admin',status=>'active'});
+
+my $jwt = Mojo::JWT->new(claims=>{sid=>'123',expires => time + 60},secret=>$secret)->encode;
 
 $t->get_ok('/')->status_is(401);
 
