@@ -35,48 +35,48 @@ has db => sub {Mojo::SQLite->new(shift->config->{login_db_dir}. '/session_store.
 
 sub login {
 	my $self = shift;
-	my $user =    $self->param('user') ||'';
-	my $pass =    $self->param('pass') || '';
-	my $message = $self->param('pass') || '';
+	my $username =    $self->param('user') ||'';
+	my $pass =        $self->param('pass') || '';
+	my $message =     $self->param('pass') || '';
     my $redirect;
 	if ($redirect = $self->param('redirect_uri')) {
 		$self->session(redirect_to => $redirect);
 	}
 
-    if ($self->session('sid')) {
-        if ( my $res = $self->db->query('select user from sessions where status=? and sid =?','active',$self->session('sid') ) ) {
-            if ($user = $res->hash->{user}) {
-            	$self->set_jwt_cookie({user=> $user, expires => time +60 });
+    if (my $sid = $self->session('sid')) {
+        if ( my $res = $self->db->query('select username from sessions where status=? and sid =?','active',$sid ) ) {
+            if ($username = $res->hash->{username}) {
+            	$self->set_jwt_cookie({sid=> $sid, expires => time +60 });
                 return $self->redirect_to($redirect) if $redirect;
                 return $self->render('login/landing_page');
             }
         }
     }
-    return $self->render if ! $user ||! $pass;
+    return $self->render if ! $username ||! $pass;
 
-	$self->app->log->info( "$user tries to log in");
+	$self->app->log->info( "$username tries to log in");
 
-	if(! $self->check($user, $pass) ) {
+	if(! $self->check($username, $pass) ) {
 		$self->app->log->warn("Cookie mojolicious: ". ($self->cookie('mojolicious')//'__UNDEF__'));
 #		$DB::single=2;
-		$self->app->log->warn("$user is NOT logged in");
+		$self->app->log->warn("$username is NOT logged in");
 		$self->session(message => 'Wrong user or password');
 		return $self->render;
 	}
 
-	$self->app->log->info("$user logs in");
+	$self->app->log->info("$username logs in");
 
     my $sid = uuid();
 	$self->session(sid=> $sid);
 	$self->set_jwt_cookie({sid=>$sid, expires => time +60 });
-	$self->db->insert('sessions',{sid=>$sid, user => $user, status =>'active', expires => time + 60 * 90 } );
+	$self->db->insert('sessions',{sid=>$sid, username => $username, status =>'active', expires => time + 60 * 90 } );
 	if (my $redirect = $self->session('redirect_to')) {
 		$self->app->log->warn("Redirect to $redirect");
 		$self->session('redirect_to' => undef); # remove redirect for later reloging
 		return $self->redirect_to($redirect);
 	}
 	$self->session(message => '');
-	$self->app->log->warn('Render landing for '.$user);
+	$self->app->log->warn('Render landing for '.$username);
 	return $self->render('login/landing_page');
 
 }
@@ -93,7 +93,7 @@ sub logout {
 	my $sid = $c->session('sid');
 	$c->db->update('sessions',{ status =>'expired',expires =>time },{sid=>$sid} );
 	$c->session(expires => 1);
-	
+
 	return	$c->redirect_to('/'.$c->config->{hypnotoad}->{service_path});
 }
 

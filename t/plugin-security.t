@@ -13,7 +13,7 @@ my $SECRET = (split(/[\s\n]/, $tmp))[0];
 say STDERR $SECRET;
 my $db = Mojo::SQLite->new($ENV{COMMON_CONFIG_DIR}.'/session_store.db')->db;
 $db->query($_) for split(/\;/, path('sql/table_defs.sql')->slurp);
-$db->insert('sessions',{sid=>123,username=>'bodil'});
+$db->insert('sessions',{sid=>'123', username=>'admin',status=>'active'});
 
 sub generate_jwt {
     my $claims = shift;

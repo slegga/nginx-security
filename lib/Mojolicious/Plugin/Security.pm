@@ -192,8 +192,9 @@ sub user {
 			if ($claims) {
 				$c->app->log->info('claims is '.j($claims));
 				$sid = $claims->{sid};
-                $username = $self->db->query('select username from sessions where status = ?  and sid = ?','active', $sid)->hash->{user};
-
+                my $h =$self->db->query('select username from sessions where status = ?  and sid = ?','active', $sid)->hash;
+                $username = $h->{username} if $h;
+                say STDERR "No username in session store" if !$username;
 				$c->tx->res->cookie('sso-jwt-token'=>'');
 			} else {
 				say STDERR 'Got jwt but no claims jwt:'. $jwt;

@@ -20,3 +20,9 @@ web_services:
         repo: nginx-security
         port: 42
         security_level: public
+    plugin-security.t:
+        port: 48
+        security_level: private
+    web-nginx-guard.t:
+        port: 47
+        security_level: private

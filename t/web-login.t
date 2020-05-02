@@ -4,6 +4,7 @@ use Mojo::Base -strict;
 use Mojo::File 'path';
 use Carp::Always;
 use Data::Dumper;
+use MIME::Base64;
 use Model::GetCommonConfig;
 $ENV{COMMON_CONFIG_DIR} ='t/etc';
 $ENV{TEST_INSECURE_COOKIES}=1;
@@ -24,8 +25,8 @@ $tx = $t->tx;
 is($tx->res->headers->header('Location'),'/test');
 like($tx->res->cookie('sso-jwt-token'),qr'sso-jwt-token.+path=\/') ;
 my $secret = (split(/[\n\s]+/,path($ENV{COMMON_CONFIG_DIR},'secrets.txt')->slurp))[0];
-my $jwt = Mojo::JWT->new(claims=>{user=>$user,expires => time + 60},secret=>$secret)->encode;
-is($tx->res->cookie('sso-jwt-token')->value,$jwt,'Cookie as expected') ;
+
+like (decode_base64($tx->res->cookie('sso-jwt-token')->value),qr'sid','Cookie as expected') ;
 my $lo = $t->app->build_controller->url_logout;
 is($lo, '/xlogin/logout','Correct path for logout');
 $t->get_ok("/$spath/logout")->status_is(302)->header_is('Location'=>'/xlogin');
