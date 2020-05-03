@@ -128,7 +128,7 @@ sub unauthorized {
     my ($self,$c) = @_;
 #    my $url = Mojo::URL->new($self->config->{login_path}.'/login')->query(redirect_uri => $c->url_for);
 #    $c->redirect_to($url);
-    $c->render(code=>403,text => 'You are not authorized to view this page. Contact the webmaster. Your username is '.$c->user->{username}. ' Your groups are '.join (',',@{$c->user->{groups}}). '. You need: ' .join(',',@{$self->authorized_groups}));
+    $c->render(code=>403,text => 'You are not authorized to view this page. Contact the webmaster. Your username is '.$c->user->{username}. ' Your groups are '.join (',',@{$c->user->{groups}||[]}). '. You need: ' .join(',',@{$self->authorized_groups}));
     return undef; ##no critic
 }
 
