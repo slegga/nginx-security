@@ -175,7 +175,7 @@ sub user {
 	my $username;
 
 	if (!$username) { # Set by nginx, client certificate
-		$username = $headers->header('X-Common-Name');
+		$username = $headers->header('X-Common-Name')||undef;
  	}
 
 	if ( !$username) { # Set user with ss0-jwt-token
@@ -207,7 +207,12 @@ sub user {
 
 	if (!$username) {
         if (my $sid = $c->session('sid')) {
-            $username = $self->db->query('select user from sessions where status = ?  and sid = ?','active', $sid)->hash->{user};
+            $username = $self->db->query('select username from sessions where status = ?  and sid = ?','active', $sid)->hash->{username};
+            if (! $username) {
+                $c->app->log->warn( 'Got sid:'. $sid. 'but it is no longer valid.');
+            }
+        } else {
+            $c->app->log->warn( 'No session from sid.');
         }
 	}
 
