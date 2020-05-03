@@ -128,7 +128,7 @@ sub unauthorized {
     my ($self,$c) = @_;
 #    my $url = Mojo::URL->new($self->config->{login_path}.'/login')->query(redirect_uri => $c->url_for);
 #    $c->redirect_to($url);
-    $c->render(text => 'You are not authorized to view this page. Contact the webmaster. Your username is '.$c->user->{username}. ' Your groups are '.join (',',@{$c->user->{groups}}). '. You need: ' .join(',',@{$self->authorized_groups}));
+    $c->render(code=>403,text => 'You are not authorized to view this page. Contact the webmaster. Your username is '.$c->user->{username}. ' Your groups are '.join (',',@{$c->user->{groups}}). '. You need: ' .join(',',@{$self->authorized_groups}));
     return undef; ##no critic
 }
 
@@ -212,7 +212,8 @@ sub user {
         $c->req->env->{identity} = $username;
         $c->session->{user} = $username;
         $c->res->headers->header( 'X-User', $username );
-        return $self->users->{$username};
+        my $users = $self->users;
+        return $users->{$username}||{username=>$username};
 	}
     $c->app->log->warn("Not authenticated.");
     $c->app->log->warn("Reqest Headers:\n". $c->req->headers->to_string);
