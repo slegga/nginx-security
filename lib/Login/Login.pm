@@ -48,7 +48,10 @@ sub login {
             if(my $h = $res->hash ) {
                 if ($username = $h->{username}) {
                 	$self->set_jwt_cookie({sid=> $sid, expires => time +60 });
-                    return $self->redirect_to($redirect) if $redirect;
+                    if ($redirect) {
+                        $self->session(redirect_to =>undef);
+                        return $self->redirect_to($redirect) ;
+                    }
                     return $self->render('login/landing_page');
                 }
             }
@@ -82,7 +85,7 @@ sub logout {
 	$c->db->update('sessions',{ status =>'expired',expires =>time },{sid=>$sid} );
 	$c->session(expires => 1);
 
-	return	$c->redirect_to('/'.$c->config->{hypnotoad}->{service_path});
+	return	$c->redirect_to($c->config->{login_path});
 }
 
 =head2 oauth2_google
