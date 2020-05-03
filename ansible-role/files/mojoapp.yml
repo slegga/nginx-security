@@ -1,11 +1,12 @@
 ---
 common_config:
-    mojo_log_path:  /var/log/hypnotoad
-    datadir:         /home/www/data
+    mojo_log_path:     /var/log/hypnotoad
+    datadir:           /home/www/data
     isp_ip_range:
         - '10.0.0.0 - 10.255.255.255'
         - '127.0.0.1 -127.0.0.255'
-    login_path: /xlogin
+    login_path:        /xlogin
+    login_db_dir:      /home/www/etc/
 web_services:
     web-api-piano:
         blueprint_dir: "${HOME}/git/api-piano/blueprints"
