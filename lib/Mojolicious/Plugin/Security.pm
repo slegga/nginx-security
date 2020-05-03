@@ -38,7 +38,7 @@ use Carp::Always;
 
 Mojolicious::Plugin::Security
 
-=head1 SYNOPSISG
+=head1 SYNOPSIS
 
 	package MyApp;
 	use Mojo::Base 'Mojolicious';
@@ -173,14 +173,11 @@ sub user {
 
 	#GET USER
 	my $username;
-	my $sid = $c->session('sid'); # User is already authenticated
-	if ($sid) {
-        $username = $self->db->query('select user from sessions where status = ?  and sid = ?','active', $sid)->hash->{user};
-	}
+
 	if (!$username) { # Set by nginx, client certificate
 		$username = $headers->header('X-Common-Name');
-        return $self->users->{$username} if $username;
-	}
+ 	}
+
 	if ( !$username) { # Set user with ss0-jwt-token
 		if (my $jwt = $c->cookie('sso-jwt-token') ) {
 			say STDERR 'Got jwt:'. $jwt;
@@ -191,7 +188,8 @@ sub user {
 			} or $c->app->log->error('Did not manage to validate jwt "'.$jwt.'" '.$!.' '.$@. "secret: ". $c->app->secrets->[0]);
 			if ($claims) {
 				$c->app->log->info('claims is '.j($claims));
-				$sid = $claims->{sid};
+				my $sid = $claims->{sid};
+				$c->session(sid=>$sid);
                 my $h =$self->db->query('select username from sessions where status = ?  and sid = ?','active', $sid)->hash;
                 $username = $h->{username} if $h;
                 say STDERR "No username in session store" if !$username;
@@ -205,6 +203,12 @@ sub user {
 			say STDERR "NO JWT:\n".$headers->to_string;
 			$c->app->log->warn( 'No jwt cookie');
 		}
+	}
+
+	if (!$username) {
+        if (my $sid = $c->session('sid')) {
+            $username = $self->db->query('select user from sessions where status = ?  and sid = ?','active', $sid)->hash->{user};
+        }
 	}
 
     #HANDLE USER SET

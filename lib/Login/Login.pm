@@ -47,16 +47,16 @@ sub login {
         if ( my $res = $self->db->query('select username from sessions where status=? and sid =?','active',$sid ) ) {
             if(my $h = $res->hash ) {
                 if ($username = $h->{username}) {
-                	$self->set_jwt_cookie({sid=> $sid, expires => time +60 });
-                    if ($redirect) {
-                        $self->session(redirect_to =>undef);
-                        return $self->redirect_to($redirect) ;
-                    }
-                    return $self->render('login/landing_page');
+                    return $self->accept_user($username);
                 }
             }
         }
+    	$self->app->log->warn("Session is not valid anymore remove from session: ". $sid);
+#
+        $self->session(sid=>undef);
     }
+
+
     return $self->render if ! $username ||! $pass;
 
 	$self->app->log->info( "$username tries to log in");
