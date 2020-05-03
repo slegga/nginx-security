@@ -65,21 +65,7 @@ sub login {
 		$self->session(message => 'Wrong user or password');
 		return $self->render;
 	}
-
-	$self->app->log->info("$username logs in");
-
-    my $sid = uuid();
-	$self->session(sid=> $sid);
-	$self->set_jwt_cookie({sid=>$sid, expires => time +60 });
-	$self->db->insert('sessions',{sid=>$sid, username => $username, status =>'active', expires => time + 60 * 90 } );
-	if (my $redirect = $self->session('redirect_to')) {
-		$self->app->log->warn("Redirect to $redirect");
-		$self->session('redirect_to' => undef); # remove redirect for later reloging
-		return $self->redirect_to($redirect);
-	}
-	$self->session(message => '');
-	$self->app->log->warn('Render landing for '.$username);
-	return $self->render('login/landing_page');
+    return $self->accept_user($username);
 
 }
 
@@ -133,25 +119,37 @@ sub oauth2_google {
 		$c->app->log->warn( "payload=".dumper($payload));
 #        delete $tmp->{id_token}; #tar for mye plass i cookie inneholder base64 {"alg":"RS256","kid":"6fcf413224765156b48768a42fac06496a30ff5a","typ":"JWT"}
         $c->session(user => $username);
-            my $sid = uuid();
-
-    	$c->session(sid=> $sid);
-    	$c->set_jwt_cookie({sid=>$sid, expires => time +60 });
-    	$c->db->insert('sessions',{sid=>$sid, username => $username, status =>'active', expires => time + 60 * 90 } );
-    	if (my $redirect = $c->session('redirect_to')) {
-    		$c->app->log->warn("Redirect to $redirect");
-    		$c->session('redirect_to' => undef); # remove redirect for later reloging
-    		return $c->redirect_to($redirect);
-    	}
-    	$c->session(message => '');
-
-        my $redirect = $c->session('redirect_to');
-        $c->session('redirect_to'=> undef);
-        $c->redirect_to($redirect);
+        return $c->accept_user($username);
     })->catch(sub {
         $c->session(message => 'Connection refused by Google. '. shift);
-        $c->render("login");
+        return $c->render("login");
     });
+
+}
+
+=head2 accept_user
+
+Set cookie and render or redirect
+
+=cut
+
+sub accept_user {
+    my $self = shift;
+    my $username = shift;
+    $self->app->log->info("$username logs in");
+
+    my $sid = uuid();
+	$self->session(sid=> $sid);
+	$self->set_jwt_cookie({sid=>$sid, expires => time +60 });
+	$self->db->insert('sessions',{sid=>$sid, username => $username, status =>'active', expires => time + 60 * 90 } );
+	if (my $redirect = $self->session('redirect_to')) {
+		$self->app->log->warn("Redirect to $redirect");
+		$self->session('redirect_to' => undef); # remove redirect for later reloging
+		return $self->redirect_to($redirect);
+	}
+	$self->session(message => '');
+	$self->app->log->warn('Render landing for '.$username);
+	return $self->render('login/landing_page');
 
 }
 
