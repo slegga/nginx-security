@@ -2,9 +2,13 @@
 % if (my $msg = flash 'message') {
   <b><%= $msg %></b><br>
 % }
-Welcome <%= session 'user' %>.<br>
-%= link_to Logout => 'logout'
-%= link_to Info => '/info'
-%= link_to Status => '/pi-status'
-%= link_to Bootstrap => '/bootstrap'
+Welcome <%= session 'user->{username}' %>.<br>
+You ar member of following groups:
+%= join (', ', @{user->{groups}});
+<br>
+% for my $service_path (keys %{config->{hypnotoad}->{web_services}}) {
+%= link_to $service_path => "/$service_path"
+<BR>
+% }
+%= link_to logout => '/xlogin/logout'
 
