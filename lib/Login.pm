@@ -34,7 +34,7 @@ sub startup {
 
 	if ( scalar keys %{$config} < 3 ) {
 		say STDERR Dumper $config;
-		my $gcc = Model::GetCommonConfig->new;
+		my $gcc = Model::GetCommonConfig->new(__PACKAGE__);
 		$config = $gcc->get_mojoapp_config($0,{debug=>1});
 
 		$self->config($config);

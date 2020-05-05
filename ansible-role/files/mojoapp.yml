@@ -14,4 +14,5 @@ web_services:
     MyApp:
         pi-status-file: /home/www/data/pi-status.json
         accesslogfile:  /home/www/log/pi-web-access.log
+    Login:
 
