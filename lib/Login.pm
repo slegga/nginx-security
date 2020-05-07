@@ -50,7 +50,7 @@ sub startup {
 	$self->sessions->cookie_name( $config->{moniker} );
 
 	$self->plugin('MyApp::Plugin::Logger');
-	$self->plugin('Mojolicious::Plugin::Security'); # add helper user, add hook
+	$self->plugin('Mojolicious::Plugin::Security' => { main_module_name=>__PACKAGE__ }); # add helper user, add hook
 	if (exists $self->config->{oauth2}->{google}) {
         $self->plugin('OAuth2'=> {google => {
             key     => $self->config->{oauth2}->{google}->{ClientID},

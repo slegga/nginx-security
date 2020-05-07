@@ -64,7 +64,7 @@ Mojolicious::Plugin::Security
 	sub startup {
 		my $self = shift;
 		my $gcc = Model::GetCommonConfig->new;
-		my $config = $gcc->get_mojoapp_config($0);
+		my $config = $gcc->get_mojoapp_config(__PACKAGE__);
 		$self->config($config);
 		$self->secrets($config->{secrets});
 		$self->plugin('Mojolicious::Plugin::Security');
