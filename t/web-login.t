@@ -34,10 +34,10 @@ my $loc = $t->tx->res->headers->header('Location');
 is ($loc, '/xlogin','Location');
 $t->get_ok($loc)->status_is(200)->content_like(qr'user');
 
-# login no rights
+diag "login no rights";
 $t->get_ok("/$spath")->status_is(200);
-$t->post_ok("/$spath"=>form=>{user => 'noone',pass => 'secret'})->status_is(200)->content_is('');
-$t->header_is('Location','');
+$t->post_ok("/$spath"=>form=>{user => 'noone',pass => 'secret'})->status_is(200)->content_like(qr'noone');
+#$t->header_is('Location','');
 
 
 done_testing();

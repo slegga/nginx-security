@@ -52,7 +52,7 @@ get '/' => sub {
             $headers->header('X-User',undef);
         	return $c->render( text => 'Logged in', status => 200 );
         }
-        $c->session->{user} = $user;
+        $c->session->{username} = $user;
         $c->res->headers->header( 'X-User', $user );
         return $c->render( text => 'Logged in', status => 200 );
 	}

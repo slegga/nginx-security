@@ -178,6 +178,18 @@ sub user {
 		$username = $headers->header('X-Common-Name')||undef;
  	}
 
+	if (!$username) {
+        if (my $sid = $c->session('sid')) {
+            my $h = $self->db->query('select username from sessions where status = ?  and sid = ?','active', $sid)->hash;
+            $username = $h->{username} if ref $h;;
+            if (! $username) {
+                $c->app->log->warn( 'Got sid:'. $sid. 'but it is no longer valid.');
+            }
+        } else {
+            $c->app->log->warn( 'No session from sid.');
+        }
+	}
+
 	if ( !$username) { # Set user with ss0-jwt-token
 		if (my $jwt = $c->cookie('sso-jwt-token') ) {
 			say STDERR 'Got jwt:'. $jwt;
@@ -192,7 +204,7 @@ sub user {
 				$c->session(sid=>$sid);
                 my $h =$self->db->query('select username from sessions where status = ?  and sid = ?','active', $sid)->hash;
                 $username = $h->{username} if $h;
-                say STDERR "No username in session store" if !$username;
+                say STDERR "No username in session store".Dumper $claims if !$username;
 				$c->tx->res->cookie('sso-jwt-token'=>'');
 			} else {
 				say STDERR 'Got jwt but no claims jwt:'. $jwt;
@@ -205,25 +217,19 @@ sub user {
 		}
 	}
 
-	if (!$username) {
-        if (my $sid = $c->session('sid')) {
-            my $h = $self->db->query('select username from sessions where status = ?  and sid = ?','active', $sid)->hash;
-            $username = $h->{username} if ref $h;;
-            if (! $username) {
-                $c->app->log->warn( 'Got sid:'. $sid. 'but it is no longer valid.');
-            }
-        } else {
-            $c->app->log->warn( 'No session from sid.');
-        }
-	}
+    if(!$username && $c->session('username')) {
+        $username = $c->session('username');
+    }
 
     #HANDLE USER SET
 	if ( $username ) {
         $c->req->env->{identity} = $username;
-        $c->session->{user} = $username;
+        $c->session->{username} = $username;
         $c->res->headers->header( 'X-User', $username );
         my $users = $self->users;
-        return $users->{$username}||{username=>$username};
+        my $user = $users->{$username}||{};
+        $user->{username} = $username;
+        return $user;
 	}
     $c->app->log->warn("Not authenticated.");
     $c->app->log->warn("Reqest Headers:\n". $c->req->headers->to_string);

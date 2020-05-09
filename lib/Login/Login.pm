@@ -151,6 +151,7 @@ sub accept_user {
 		return $self->redirect_to($redirect);
 	}
 	$self->session(message => '');
+	$self->session(username => $username);
 	$self->app->log->warn('Render landing for '.$username);
 	return $self->render('login/landing_page');
 

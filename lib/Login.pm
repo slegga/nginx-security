@@ -72,7 +72,7 @@ sub startup {
 
    $self->helper (is_logged_in => sub {
         my $c = shift;
-        return 1 if $c->session->{user};
+        return 1 if $c->session->{username};
 		$self->log->info('No none is logged in:  '. $c->req->headers->to_string);
         return;
    });
