@@ -4,9 +4,14 @@
 % }
 Welcome <%= session 'user->{username}' %>.<br>
 You ar member of following groups:
-%= join (', ', @{user->{groups}||[]});
+% my $ga = [];
+% my $user = user;
+% $ga = user->{groups} if $user && exists user->{groups};
+%= join (', ', @$ga);
 <br>
-% for my $service_path (keys %{config->{hypnotoad}->{web_services}||[]}) {
+% my $wsa = {};
+% $wsa = config->{hypnotoad}->{web_services} if exists config->{hypnotoad}->{web_services};
+% for my $service_path (keys %$wsa) {
 %= link_to $service_path => "/$service_path";
 <BR>
 % }

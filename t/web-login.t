@@ -29,11 +29,15 @@ my $secret = (split(/[\n\s]+/,path($ENV{COMMON_CONFIG_DIR},'secrets.txt')->slurp
 like (decode_base64($tx->res->cookie('sso-jwt-token')->value),qr'sid','Cookie as expected') ;
 my $lo = $t->app->build_controller->url_logout;
 is($lo, '/xlogin/logout','Correct path for logout');
-$t->get_ok("/$spath/logout")->status_is(302)->header_is('Location'=>'/xlogin');
+$t->get_ok("/$spath/logout")->status_is(302);
+my $loc = $t->tx->res->headers->header('Location');
+is ($loc, '/xlogin','Location');
+$t->get_ok($loc)->status_is(200)->content_like(qr'user');
 
 # login no rights
-$t->get_ok("/$spath")->status_is(302);
+$t->get_ok("/$spath")->status_is(200);
 $t->post_ok("/$spath"=>form=>{user => 'noone',pass => 'secret'})->status_is(200)->content_is('');
+$t->header_is('Location','');
 
 
 done_testing();

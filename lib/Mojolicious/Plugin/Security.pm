@@ -207,7 +207,8 @@ sub user {
 
 	if (!$username) {
         if (my $sid = $c->session('sid')) {
-            $username = $self->db->query('select username from sessions where status = ?  and sid = ?','active', $sid)->hash->{username};
+            my $h = $self->db->query('select username from sessions where status = ?  and sid = ?','active', $sid)->hash;
+            $username = $h->{username} if ref $h;;
             if (! $username) {
                 $c->app->log->warn( 'Got sid:'. $sid. 'but it is no longer valid.');
             }
