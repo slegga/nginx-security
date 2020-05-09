@@ -31,5 +31,10 @@ my $lo = $t->app->build_controller->url_logout;
 is($lo, '/xlogin/logout','Correct path for logout');
 $t->get_ok("/$spath/logout")->status_is(302)->header_is('Location'=>'/xlogin');
 
+# login no rights
+$t->get_ok("/$spath")->status_is(302);
+$t->post_ok("/$spath"=>form=>{user => 'noone',pass => 'secret'})->status_is(200)->content_is('');
+
+
 done_testing();
 
