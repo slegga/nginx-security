@@ -17,13 +17,10 @@ my $t = Test::Mojo->new('Login',$cfg); #Mojo::File->new('script/web-login.pl'),{
 $t->get_ok("/$spath")->status_is(200);
 my $user ='admin';
 $t->post_ok("/$spath"=>form=>{user => $user,pass => 'lulz'})->status_is(200)->content_like(qr'Welcome')->content_like(qr/$user/)->content_like(qr'plugin');
-my $tx = $t->tx;
-print STDERR Dumper $tx;
+#my $tx = $t->tx;
+#print STDERR Dumper $tx;
 
-TODO: {
-    local $TODO = "Some how session is set to expire";
     $t->get_ok("/$spath?redirect_uri=/test")->status_is(302)->content_is('');
-}
 $t->post_ok("/$spath?redirect_uri=/test"=>form=>{user => $user,pass => 'lulz'})->status_is(302)->content_is('');
 my $tx = $t->tx;
 is($tx->res->headers->header('Location'),'/test');
