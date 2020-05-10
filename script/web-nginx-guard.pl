@@ -23,7 +23,6 @@ app->secrets(app->config->{secrets});
 app->sessions->default_expiration( 3600 * 1 );
 app->sessions->secure( $ENV{TEST_INSECURE_COOKIES} ? 0 : 1 );
 app->sessions->secure( 0 );
-app->sessions->cookie_name(app->config->{moniker});
 my $secret = app->secrets->[0];
 if (! $ENV{TEST_INSECURE_COOKIES}) {
 	app->log->path(app->config('mojo_log_path'));

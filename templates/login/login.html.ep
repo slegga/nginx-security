@@ -14,4 +14,4 @@
 Click here to log in:
 <%# link_to "Connect!", $auth_url %>
 
-<%= link_to "Connect!", $c->url_for('google') %>
+<%= link_to "Connect!", $c->url_for->path('/xlogin/google') %>
