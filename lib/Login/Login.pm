@@ -42,8 +42,11 @@ sub login {
 	if ($redirect = $self->param('redirect_uri')) {
 		$self->session(redirect_to => $redirect);
 	}
-
-    if (my $sid = $self->session('sid')) {
+    say STDERR '###################################################################################################################INNE';
+    my $sid = $self->session('sid');
+    if ($sid) {
+    say STDERR '###################################################################################################################SID';
+        $self->app->log->warn( "sid found");
         if ( my $res = $self->db->query('select username from sessions where status=? and sid =?','active',$sid ) ) {
             if(my $h = $res->hash ) {
                 if ($username = $h->{username}) {
@@ -52,22 +55,25 @@ sub login {
             }
         }
     	$self->app->log->warn("Session is not valid anymore remove from session: ". $sid);
-#
         $self->session(sid=>undef);
+		return $self->render;
     }
 
+    else {
+#die;
+        $self->app->log->warn("#Cookie mojolicious: ". ($self->cookie('mojolicious')//'__UNDEF__'));
+    	$self->app->log->warn( "No sid");
+       return $self->render if ! $username ||! $pass ;
+    	$self->app->log->info( "$username tries to log in");
 
-    return $self->render if ! $username ||! $pass;
+    	if(! $self->check($username, $pass) ) {
+    		$self->app->log->warn("$username is NOT logged in");
+    		$self->session(message => 'Wrong user or password');
+    		return $self->render;
+    	}
+    say STDERR '###################################################################################################################BASIC';
+    }
 
-	$self->app->log->info( "$username tries to log in");
-
-	if(! $self->check($username, $pass) ) {
-		$self->app->log->warn("Cookie mojolicious: ". ($self->cookie('mojolicious')//'__UNDEF__'));
-#		$DB::single=2;
-		$self->app->log->warn("$username is NOT logged in");
-		$self->session(message => 'Wrong user or password');
-		return $self->render;
-	}
     return $self->accept_user($username);
 
 }
@@ -84,7 +90,7 @@ sub logout {
 	my $sid = $c->session('sid');
 	$c->db->update('sessions',{ status =>'expired',expires =>time },{sid=>$sid} );
 	$c->session(sid => undef);
-	$c->session(expire => 1);
+#	$c->session(expire => 1);
 
 	return	$c->redirect_to($c->config->{login_path});
 }
@@ -140,23 +146,22 @@ sub accept_user {
     my $self = shift;
     my $username = shift;
     $self->app->log->info("$username logs in");
+    $self->app->sessions->secure( $ENV{TEST_INSECURE_COOKIES} ? 0 : 1 ); # a try to fix keeping session
 
     my $sid = uuid();
 	$self->session(sid=> $sid);
-	$self->set_jwt_cookie({sid=>$sid, expires => time +60 });
-	$self->db->insert('sessions',{sid=>$sid, username => $username, status =>'active', expires => time + 60 * 90 } );
+	$self->session(message => '');
+    $self->session(expires => time + 3600); #last for 1 hour
+	$self->db->insert('sessions',{sid=>$sid, username => $username, status =>'active', expires => $self->session('expires') } );
 	if (my $redirect = $self->session('redirect_to')) {
 		$self->app->log->warn("Redirect to $redirect");
 		$self->session('redirect_to' => undef); # remove redirect for later reloging
 		return $self->redirect_to($redirect);
 	}
-	$self->session(message => '');
-	$self->session(username => $username);
 	$self->app->log->warn('Render landing for '.$username);
 	my $ws = YAML::Tiny->read( ($ENV{COMMON_CONFIG_DIR}||$ENV{HOME}.'/etc').'/hypnotoad.yml' )->[0]->{web_services};
 	$self->stash(web_services => $ws);
 	return $self->render('login/landing_page');
-
 }
 
 1;
