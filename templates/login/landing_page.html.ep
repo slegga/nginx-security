@@ -9,9 +9,9 @@ You ar member of following groups:
 % $ga = user->{groups} if $user && exists user->{groups};
 %= join (', ', @$ga);
 <br>
-% my $wsa = {};
-% $wsa = config->{hypnotoad}->{web_services} if exists config->{hypnotoad}->{web_services};
-% for my $service_path (keys %$wsa) {
+%# my $wsa = {$we};
+%# $wsa = config->{hypnotoad}->{web_services} if exists config->{hypnotoad}->{web_services};
+% for my $service_path (keys %$web_services) {
 %= link_to $service_path => "/$service_path";
 <BR>
 % }

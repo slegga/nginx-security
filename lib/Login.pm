@@ -63,7 +63,7 @@ sub startup {
 	push @{$self->static->paths}, $self->home->rel_file('static');
 	$self->sessions->default_expiration( 3600 * 1 );
 	$self->sessions->secure( $ENV{TEST_INSECURE_COOKIES} ? 0 : 1 );
-	$self->sessions->cookie_name( $config->{moniker} );
+	# $self->sessions->cookie_name( $config->{moniker} );
 
 	$self->plugin('MyApp::Plugin::Logger');
 	$self->plugin('Mojolicious::Plugin::Security' => { main_module_name=>__PACKAGE__ }); # add helper user, add hook

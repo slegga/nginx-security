@@ -154,6 +154,8 @@ sub accept_user {
 	$self->session(message => '');
 	$self->session(username => $username);
 	$self->app->log->warn('Render landing for '.$username);
+	my $ws = YAML::Tiny->read( ($ENV{COMMON_CONFIG_DIR}||$ENV{HOME}.'/etc').'/hypnotoad.yml' )->[0]->{web_services};
+	$self->stash(web_services => $ws);
 	return $self->render('login/landing_page');
 
 }
