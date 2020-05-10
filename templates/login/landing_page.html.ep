@@ -2,10 +2,10 @@
 % if (my $msg = flash 'message') {
   <b><%= $msg %></b><br>
 % }
-Welcome <%= session 'user->{username}' %>.<br>
+% my $user = user;
+Welcome <%= $user->{username} %>.<br>
 You ar member of following groups:
 % my $ga = [];
-% my $user = user;
 % $ga = user->{groups} if $user && exists user->{groups};
 %= join (', ', @$ga);
 <br>

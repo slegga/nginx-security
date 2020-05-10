@@ -10,6 +10,9 @@ use Data::Dumper;
 use Mojo::JWT;
 use Mojo::JSON 'j';
 
+helper db => sub {Mojo::SQLite->new(shift->config->{login_db_dir}. '/session_store.db')->db};
+
+
 my $gcc = Model::GetCommonConfig->new;
 #my $name = fileparse($0,'.pl');
 #plugin Config => {toadfarm => $gcc->get_hypnotoad_config($0) };
@@ -43,17 +46,41 @@ get '/' => sub {
         $c->render( text => 'nginx is not configured.', status => 500 );
     }
 
-	#GET USER
-	my $user = $c->user();
-	if ( $user ) {
-        $c->req->env->{identity} = $c->session('user');
+	#GET SID
+	my $sid;
+	if ( $c->session('sid') ) {
+	    $sid = $c->session('sid');
+	}
+
+    if (!$sid ) {
+        if( my $jwt = $c->cookie('sso-jwt-token') ) {
+            say STDERR 'Got jwt:'. $jwt;
+                    say STDERR "SECRETX ". $c->app->secrets->[0];
+            my $claims;
+            eval {
+                $claims = Mojo::JWT->new(secret => $c->app->secrets->[0])->decode($jwt);
+            } or $c->app->log->error('Did not manage to validate jwt "'.$jwt.'" '.$!.' '.$@. "secret: ". $c->app->secrets->[0]);
+            if ($claims) {
+                $c->app->log->info('claims is '.j($claims));
+                $sid = $claims->{sid};
+                $c->tx->res->cookie('sso-jwt-token'=>'');
+            } else {
+                say STDERR 'Got jwt but no claims jwt:'. $jwt;
+                #				say STDERR "secret: ".$c->app->secrets->[0];
+                $c->app->log->warn( 'Got jwt but no claims jwt:'. $jwt);
+            }
+        }
+    }
+    if($sid) {
+        my $h = $c->db->query('select username from sessions where status = ?  and sid = ?','active', $sid)->hash;
+        my $username = $h->{username} if ref $h;;
+        $c->req->env->{identity} = $username;
         if ( $uri =~ m!/logout\b! ) {
             $c->session( expires => 1 );
             $headers->header('X-User',undef);
         	return $c->render( text => 'Logged in', status => 200 );
         }
-        $c->session->{username} = $user;
-        $c->res->headers->header( 'X-User', $user );
+        $c->res->headers->header( 'X-User', $username );
         return $c->render( text => 'Logged in', status => 200 );
 	}
     $c->app->log->warn("Not authenticated.");

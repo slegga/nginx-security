@@ -16,7 +16,7 @@ my $spath = $cfg->{hypnotoad}->{service_path};
 my $t = Test::Mojo->new('Login',$cfg); #Mojo::File->new('script/web-login.pl'),{config=>$cfg});
 $t->get_ok("/$spath")->status_is(200);
 my $user ='admin';
-$t->post_ok("/$spath"=>form=>{user => $user,pass => 'lulz'})->status_is(200)->content_like(qr'Welcome');
+$t->post_ok("/$spath"=>form=>{user => $user,pass => 'lulz'})->status_is(200)->content_like(qr'Welcome')->content_like(qr/$user/);
 my $tx = $t->tx;
 #print STDERR Dumper $tx;
 $t->get_ok("/$spath?redirect_uri=/test")->status_is(302);

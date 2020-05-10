@@ -74,6 +74,10 @@ Mojolicious::Plugin::Security
 
 Common module for security issue and utility module.
 
+Session has only sid - session id
+Username for sid is stored in sessions table.
+Never store username in session or JWT.
+
 =head1 HOOKS ADDED
 
 =head2 before_dispatch
@@ -172,25 +176,13 @@ sub user {
 	my $headers = $c->tx->req->headers;
 
 	#GET USER
-	my $username;
+	my $sid;
 
-	if (!$username) { # Set by nginx, client certificate
-		$username = $headers->header('X-Common-Name')||undef;
- 	}
-
-	if (!$username) {
-        if (my $sid = $c->session('sid')) {
-            my $h = $self->db->query('select username from sessions where status = ?  and sid = ?','active', $sid)->hash;
-            $username = $h->{username} if ref $h;;
-            if (! $username) {
-                $c->app->log->warn( 'Got sid:'. $sid. 'but it is no longer valid.');
-            }
-        } else {
-            $c->app->log->warn( 'No session from sid.');
-        }
+	if (!$sid) {
+        $sid = $c->session('sid');
 	}
 
-	if ( !$username) { # Set user with ss0-jwt-token
+	if ( !$sid) { # Set user with ss0-jwt-token
 		if (my $jwt = $c->cookie('sso-jwt-token') ) {
 			say STDERR 'Got jwt:'. $jwt;
             say STDERR "SECRETX ". $c->app->secrets->[0];
@@ -200,11 +192,7 @@ sub user {
 			} or $c->app->log->error('Did not manage to validate jwt "'.$jwt.'" '.$!.' '.$@. "secret: ". $c->app->secrets->[0]);
 			if ($claims) {
 				$c->app->log->info('claims is '.j($claims));
-				my $sid = $claims->{sid};
-				$c->session(sid=>$sid);
-                my $h =$self->db->query('select username from sessions where status = ?  and sid = ?','active', $sid)->hash;
-                $username = $h->{username} if $h;
-                say STDERR "No username in session store".Dumper $claims if !$username;
+				$sid = $claims->{sid};
 				$c->tx->res->cookie('sso-jwt-token'=>'');
 			} else {
 				say STDERR 'Got jwt but no claims jwt:'. $jwt;
@@ -217,20 +205,35 @@ sub user {
 		}
 	}
 
-    if(!$username && $c->session('username')) {
-        $username = $c->session('username');
-    }
+
 
     #HANDLE USER SET
-	if ( $username ) {
-        $c->req->env->{identity} = $username;
-        $c->session->{username} = $username;
-        $c->res->headers->header( 'X-User', $username );
-        my $users = $self->users;
-        my $user = $users->{$username}||{};
-        $user->{username} = $username;
-        return $user;
+	if ( $sid ) {
+        my $h = $self->db->query('select username from sessions where status = ?  and sid = ?','active', $sid)->hash;
+        my $username;
+        $username = $h->{username} if ref $h;
+        if (! $username) {
+            $c->app->log->warn( 'Got sid:'. $sid. 'but it is no longer valid.');
+            $c->session(sid => undef)
+        } else {
+            $c->req->env->{identity} = $username;
+            $c->session->{sid} = $sid;
+            $c->res->headers->header( 'X-User', $username );
+            my $users = $self->users;
+            my $user = $users->{$username}||{};
+            $user->{username} = $username;
+            return $user;
+        }
 	}
+
+	if ($headers->header('X-Common-Name')) { # Set by nginx, client certificate
+		my $username = $headers->header('X-Common-Name');
+            my $users = $self->users;
+            my $user = $users->{$username};
+            $user->{username} = $username if ref $user;
+            return $user;
+ 	}
+
     $c->app->log->warn("Not authenticated.");
     $c->app->log->warn("Reqest Headers:\n". $c->req->headers->to_string);
 

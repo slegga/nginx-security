@@ -24,6 +24,22 @@ Main loop for Login page.
 
 =cut
 
+has users => sub {
+    my $users;
+    my $userfile = $ENV{COMMON_CONFIG_DIR}||$ENV{MOJO_CONFIG}||"$FindBin::Bin/../../../etc";
+    $userfile .= "/users.yml";
+    # warn $userfile;
+    die "Missing users.yml file $userfile. Please add" if (! -r $userfile );
+    my $tmp = YAML::Tiny->read( $userfile );
+    $users = $tmp->[0]->{users};
+    for my $k(%$users) {
+        $users->{$k}->{username} = $k;
+    }
+    return $users;
+};
+has db => sub {Mojo::SQLite->new(shift->config->{login_db_dir}. '/session_store.db')->db};
+
+
 sub startup {
 	my $self = shift;
 
@@ -72,7 +88,12 @@ sub startup {
 
    $self->helper (is_logged_in => sub {
         my $c = shift;
-        return 1 if $c->session->{username};
+        if (my $sid = $c->session->{sid}) {
+          my $h = $self->db->query('select username from sessions where status = ?  and sid = ?','active', $sid)->hash;
+            my $username;
+            $username = $h->{username} if ref $h;
+            return 1 if $username;
+        }
 		$self->log->info('No none is logged in:  '. $c->req->headers->to_string);
         return;
    });

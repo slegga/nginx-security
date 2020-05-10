@@ -83,7 +83,8 @@ sub logout {
 	my $c = shift;
 	my $sid = $c->session('sid');
 	$c->db->update('sessions',{ status =>'expired',expires =>time },{sid=>$sid} );
-	$c->session(expires => 1);
+	$c->session(sid => undef);
+	$c->session(expire => 1);
 
 	return	$c->redirect_to($c->config->{login_path});
 }
