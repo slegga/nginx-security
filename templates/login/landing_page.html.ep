@@ -11,8 +11,8 @@ You ar member of following groups:
 <br>
 %# my $wsa = {$we};
 %# $wsa = config->{hypnotoad}->{web_services} if exists config->{hypnotoad}->{web_services};
-% for my $service_path (keys %$web_services) {
-%= link_to $service_path => "/$service_path";
+% for my $service (keys %$web_services) {
+%= link_to $service => "/" . $web_services->{$service}->{service_path};
 <BR>
 % }
 %= link_to logout => '/xlogin/logout'

@@ -7,6 +7,7 @@ web_services:
         repo: nginx-security
         port: 8101
         security_level: public
+        service_path: guard
     Login:
         repo: nginx-security
         port: 8102
@@ -16,13 +17,17 @@ web_services:
         repo: nginx-security
         port: 42
         security_level: public
+        service_path: service
     GetCommonConfig.t:
         repo: nginx-security
         port: 42
         security_level: public
+        service_path: service
     plugin-security.t:
         port: 48
         security_level: private
+        service_path: plugin
     web-nginx-guard.t:
         port: 47
         security_level: private
+        service_path: guard

@@ -122,7 +122,6 @@ sub oauth2_google {
         $username = $payload->{email} if ref $payload;
 		$c->app->log->warn( "payload=".dumper($payload));
 #        delete $tmp->{id_token}; #tar for mye plass i cookie inneholder base64 {"alg":"RS256","kid":"6fcf413224765156b48768a42fac06496a30ff5a","typ":"JWT"}
-        $c->session(user => $username);
         return $c->accept_user($username);
     })->catch(sub {
         $c->session(message => 'Connection refused by Google. '. shift);
