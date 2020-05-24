@@ -102,7 +102,7 @@ sub startup {
 		my $claims = shift;
 
 		my $jwt = Mojo::JWT->new(claims => $claims, secret => $self->secrets->[0])->encode;
-		$c->cookie('sso-jwt-token', $jwt,{expires => time + 120,secure => $ENV{TEST_INSECURE_COOKIES} ? 0 : 1, path =>'/',samesite =>'Lax', httponly=>1 });
+		$c->cookie('sso-jwt-token', $jwt,{expires => time + 120,secure => $ENV{TEST_INSECURE_COOKIES} ? 0 : 1, path =>'/',samesite =>'Lax', httponly=>0 });
 	});
 	#slutt flytting
 }
