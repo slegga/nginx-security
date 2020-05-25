@@ -326,6 +326,7 @@ Auto called from Mojolicious. Do the setup.
 sub register {
   	my ( $self, $app, $attributes ) = @_;
     $app->session(httponly=>0);
+    $app->sessions->samesite('none');
 	# Register helpers
 	for my $h(qw/is_authorized check unauthenticated unauthorized url_logout url_abspath user/ ) {
     	$app->helper($h => sub {$self->$h(@_)});
