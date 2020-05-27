@@ -180,7 +180,7 @@ sub user {
 
 	if (!$sid) {
         $sid = $c->session('sid');
-		say STDERR 'Got sid:'. $sid;
+		say STDERR 'Got sid:'. $sid if $sid;
 	}
 
 	if ( !$sid) { # Set user with ss0-jwt-token
