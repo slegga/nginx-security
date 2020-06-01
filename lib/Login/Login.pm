@@ -147,6 +147,7 @@ sub accept_user {
     my $username = shift;
     $self->app->log->info("$username logs in");
     $self->app->sessions->secure( $ENV{TEST_INSECURE_COOKIES} ? 0 : 1 ); # a try to fix keeping session
+    $self->app->sessions->samesite('none');
 
     my $sid = uuid();
 	$self->session(sid=> $sid);
