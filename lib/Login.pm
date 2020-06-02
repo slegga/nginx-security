@@ -44,7 +44,9 @@ sub startup {
 	my $self = shift;
 
 	#MUST CHANGE WHEN FIXED
-	$self->mode('development');
+#	$self->mode('development');
+    $self->app->sessions->secure( $ENV{TEST_INSECURE_COOKIES} ? 0 : 1 ); # a try to fix keeping session
+    $self->app->sessions->samesite('None');
 	$DB::single=2;
 	my $config =  $self->config;
 

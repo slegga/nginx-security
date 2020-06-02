@@ -146,12 +146,10 @@ sub accept_user {
     my $self = shift;
     my $username = shift;
     $self->app->log->info("$username logs in");
-    $self->app->sessions->secure( $ENV{TEST_INSECURE_COOKIES} ? 0 : 1 ); # a try to fix keeping session
-    $self->app->sessions->samesite('None');
 
     my $sid = uuid();
 	$self->session(sid=> $sid);
-	$self->session(message => '');
+	$self->session(message => '',secure=>1);
     $self->session(expires => time + 3600); #last for 1 hour
 	$self->db->insert('sessions',{sid=>$sid, username => $username, status =>'active', expires => $self->session('expires') } );
 	if (my $redirect = $self->session('redirect_to')) {
