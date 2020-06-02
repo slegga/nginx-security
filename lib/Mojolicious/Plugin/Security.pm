@@ -144,7 +144,7 @@ Return logout link as Mojo::URL
 
 sub url_logout {
     my ($self,$c) = @_;
-    $c->session(expires=>1);
+    $c->session(expires=>1, message=>'url_logout');
     die "Missing login_path in mojoapp.yml" if ! $self->config->{login_path};
     return Mojo::URL->new($self->config->{login_path}.'/logout')->to_abs;
 }
@@ -180,7 +180,8 @@ sub user {
 
 	if (!$sid) {
         $sid = $c->session('sid');
-		say STDERR 'Got sid:'. $sid if $sid;
+		say STDERR 'GOT sid:'. $sid if $sid;
+		say STDERR 'NO sid:'. $sid if ! $sid;
 	}
 
 	if ( !$sid) { # Set user with ss0-jwt-token
@@ -205,8 +206,6 @@ sub user {
 			$c->app->log->warn( 'No jwt cookie');
 		}
 	}
-
-
 
     #HANDLE USER SET
 	if ( $sid ) {

@@ -75,7 +75,7 @@ get '/' => sub {
         my $username = $h->{username} if ref $h;;
         $c->req->env->{identity} = $username;
         if ( $uri =~ m!/logout\b! ) {
-            $c->session( expires => 1 );
+            $c->session( expires => 1, message => 'logout' );
             $headers->header('X-User',undef);
         	return $c->render( text => 'Logged in', status => 200 );
         }

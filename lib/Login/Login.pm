@@ -37,7 +37,7 @@ sub login {
 	my $self = shift;
 	my $username =    $self->param('user') ||'';
 	my $pass =        $self->param('pass') || '';
-	my $message =     $self->param('pass') || '';
+	my $message =     $self->param('message') || $self->session('message');
     my $redirect;
 	if ($redirect = $self->param('redirect_uri')) {
 		$self->session(redirect_to => $redirect);
@@ -55,14 +55,14 @@ sub login {
             }
         }
     	$self->app->log->warn("Session is not valid anymore remove from session: ". $sid);
-        $self->session(sid=>undef);
+        $self->session(sid=>'');
 		return $self->render;
     }
 
     else {
-#die;
+        $self->session(message=>'',expires=>time+300);
         $self->app->log->warn("#Cookie mojolicious: ". ($self->cookie('mojolicious')//'__UNDEF__'));
-    	$self->app->log->warn( "No sid");
+    #	$self->app->log->warn( "No sid");
        return $self->render if ! $username ||! $pass ;
     	$self->app->log->info( "$username tries to log in");
 
@@ -148,8 +148,7 @@ sub accept_user {
     $self->app->log->info("$username logs in");
 
     my $sid = uuid();
-	$self->session(sid=> $sid);
-	$self->session(message => '',secure=>1);
+	$self->session(sid=> $sid,message => '');
     $self->session(expires => time + 3600); #last for 1 hour
 	$self->db->insert('sessions',{sid=>$sid, username => $username, status =>'active', expires => $self->session('expires') } );
 	if (my $redirect = $self->session('redirect_to')) {
