@@ -25,8 +25,7 @@ sub generate_jwt {
 
 {
     use Mojolicious::Lite;
-
-#    plugin 'RequestBase';
+    app->config(hypnotoad=>{service_path=>'foo'},login_db_dir=>'t/etc');
     plugin 'Mojolicious::Plugin::Security';
     app->secrets([$SECRET]);
     my $home = Mojo::Home->new->detect;
@@ -66,7 +65,7 @@ $t->request_ok($tx)->status_is(200);#->content_like(qr'deadly');#->content_is(''
 
 
 # utility functions;
-is ($t->app->config->{hypnotoad}->{service_path},undef,'Check path');
+is ($t->app->config->{hypnotoad}->{service_path}, 'foo','Check path');
 # this test does not work because Mojolicious::Plugin::Security has it own config and is not dependant on the global one.
 # $t->app->config->{hypnotoad}->{service_path} = 'base';
 # $t->get_ok('/url_abspath')->status_is(200)->content_is('/base/info');

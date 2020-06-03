@@ -5,6 +5,8 @@ use Carp::Always;
 $ENV{COMMON_CONFIG_DIR} = 't/etc';
 {
     use Mojolicious::Lite;
+
+    app->config(hypnotoad=>{});
     plugin 'Security'=>{authorized_groups => [qw/all area1/]};
     my $home = Mojo::Home->new->detect;
     get '/ssl' => sub {
