@@ -67,8 +67,9 @@ Mojolicious::Plugin::Security
 		my $config = $gcc->get_mojoapp_config(__PACKAGE__);
 		$self->config($config);
 		$self->secrets($config->{secrets});
-		$self->plugin('Mojolicious::Plugin::Security');
+		$self->plugin('Mojolicious::Plugin::Security'=>{main_module_name=> __PACKAGE__, authorized_groups =>['all']);
 		my $logged_in = $self->routes->under('/' => sub {my $c = shift;return 1 if $c->user;return});
+    }
 
 =head1 DESCRIPTION
 
@@ -78,20 +79,26 @@ Session has only sid - session id
 Username for sid is stored in sessions table.
 Never store username in session or JWT.
 
-=head1 HOOKS ADDED
-
-=head2 before_dispatch
-
-Read $app->config->{hypnotoad}->{service_path} and adjust urls.
-
 =head1 ATTRIBUTES
+
+=over 4
+
+=item main_module_name - Set module for search for configuration. Hypnotoad and mojoapp.
+
+=item authorized_groups - Array ref of groups that is allowed to access this web-app.
+
+=back
 
 =cut
 
 has 'main_module_name';
-has config => sub {Model::GetCommonConfig->new->get_mojoapp_config(shift->main_module_name||$0)};
+
+# config
+has _config => sub {Model::GetCommonConfig->new->get_mojoapp_config(shift->main_module_name||$0)};
 has 'authorized_groups' => sub{[]};
-has users => sub {
+
+# All the users in the system
+has _users => sub {
     my $users;
     my $userfile = $ENV{COMMON_CONFIG_DIR}||$ENV{MOJO_CONFIG}||"$FindBin::Bin/../../../etc";
     $userfile .= "/users.yml";
@@ -104,7 +111,9 @@ has users => sub {
     }
     return $users;
 };
-has db => sub {Mojo::SQLite->new(shift->config->{login_db_dir}. '/session_store.db')->db};
+
+# db handler
+has _db => sub {Mojo::SQLite->new(shift->_config->{login_db_dir}. '/session_store.db')->db};
 
 =head1 HELPERS
 
@@ -116,7 +125,7 @@ Redirects to login page
 
 sub unauthenticated {
     my ($self,$c) = @_;
-    my $url = Mojo::URL->new($self->config->{login_path}.'/login')->query(redirect_uri => $c->url_for,message => 'unauthenticated');
+    my $url = Mojo::URL->new($self->_config->{login_path}.'/login')->query(redirect_uri => $c->url_for,message => 'unauthenticated');
     $c->redirect_to($url);
     return undef; ##no critic
 
@@ -130,8 +139,6 @@ Return standard webpage when trying to access restricted pages
 
 sub unauthorized {
     my ($self,$c) = @_;
-#    my $url = Mojo::URL->new($self->config->{login_path}.'/login')->query(redirect_uri => $c->url_for);
-#    $c->redirect_to($url);
     $c->render(code=>403,text => 'You are not authorized to view this page. Contact the webmaster. Your username is '.$c->user->{username}. ' Your groups are '.join (',',@{$c->user->{groups}||[]}). '. You need: ' .join(',',@{$self->authorized_groups}));
     return undef; ##no critic
 }
@@ -145,8 +152,8 @@ Return logout link as Mojo::URL
 sub url_logout {
     my ($self,$c) = @_;
     $c->session(expires=>1, message=>'url_logout');
-    die "Missing login_path in mojoapp.yml" if ! $self->config->{login_path};
-    return Mojo::URL->new($self->config->{login_path}.'/logout')->to_abs;
+    die "Missing login_path in mojoapp.yml" if ! $self->_config->{login_path};
+    return Mojo::URL->new($self->_config->{login_path}.'/logout')->to_abs;
 }
 
 =head2 url_abspath
@@ -157,8 +164,7 @@ Like url_for, but return expected url with configured base path. Return string.
 
 sub url_abspath {
     my ($self,$c,$local_path) = @_;
-#    warn $c->config->{hypnotoad}->{service_path};
-    my $return = $c->url_for->path->parts([$c->config->{hypnotoad}->{service_path}, $local_path]);
+    my $return = $c->url_for->path->parts([$self->_config->{hypnotoad}->{service_path}, $local_path]);
     return $return;
 }
 
@@ -181,7 +187,7 @@ sub user {
 	if (!$sid) {
         $sid = $c->session('sid');
 		say STDERR 'GOT sid:'. $sid if $sid;
-		say STDERR 'NO sid:'. $sid if ! $sid;
+		say STDERR 'NO sid: '. ($sid//'') if ! $sid;
 	}
 
 	if ( !$sid) { # Set user with ss0-jwt-token
@@ -209,7 +215,7 @@ sub user {
 
     #HANDLE USER SET
 	if ( $sid ) {
-        my $h = $self->db->query('select username from sessions where status = ?  and sid = ?','active', $sid)->hash;
+        my $h = $self->_db->query('select username from sessions where status = ?  and sid = ?','active', $sid)->hash;
         my $username;
         $username = $h->{username} if ref $h;
         if (! $username) {
@@ -219,7 +225,7 @@ sub user {
             $c->req->env->{identity} = $username;
             $c->session->{sid} = $sid;
             $c->res->headers->header( 'X-User', $username );
-            my $users = $self->users;
+            my $users = $self->_users;
             my $user = $users->{$username}||{};
             $user->{username} = $username;
             return $user;
@@ -228,7 +234,7 @@ sub user {
 
 	if ($headers->header('X-Common-Name')) { # Set by nginx, client certificate
 		my $username = $headers->header('X-Common-Name');
-            my $users = $self->users;
+            my $users = $self->_users;
             my $user = $users->{$username};
             $user->{username} = $username if ref $user;
             return $user;
@@ -252,7 +258,7 @@ sub check {
 #  $self->log->warn("$user tries to log in");
   # Success
  # warn "user = $user";
- if (my $u =  $self->users->{$user}) {
+ if (my $u =  $self->_users->{$user}) {
     if ($u->{type} eq 'password') {
         return 1 if (secure_compare($pass,$u->{secret}));
     } elsif ($u->{type} eq 'totp') {
