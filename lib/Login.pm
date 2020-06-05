@@ -12,7 +12,15 @@ use Data::Dumper;
 
 Login
 
-=head1 DESRIPTION
+=head1 SYNOPSIS
+
+    use Mojolicious::Commands;
+    use lib 'lib';
+    # Always start daemon for application
+    Mojolicious::Commands->start_app('Login', 'daemon', '-l', 'http://*:8080');
+
+
+=head1 DESCRIPTION
 
 Main lib for Nginx Login page.
 

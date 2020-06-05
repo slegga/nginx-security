@@ -13,6 +13,12 @@ use Carp 'confess';
 
 Model::GetCommonConfig - Module for extracting common config. Especially hypnotoad.
 
+=head1 SYNOPSIS
+
+    use YAML::Tiny 'Dump';
+    my $config = Model::GetCommonConfig->new->get_mojoapp_config;
+    print Dump $config;
+
 =head1 DESCRIPTION
 
 Give config for script.
@@ -36,11 +42,10 @@ has 'debug';
 
 =head1 METHODS
 
-# =head2 get_hypnotoad_config
-# Return hypnotoad config from common config file
-
 =cut
 
+# =head2 get_hypnotoad_config
+# Return hypnotoad config from common config file
 sub _get_hypnotoad_config {
     my $self = shift;
     die "Not an object $self" if !ref $self;
@@ -80,7 +85,7 @@ sub _get_hypnotoad_config {
 
 =head2 get_mojoapp_config
 
-Return app config from common config file
+Return app config from common config file. See synopsis.
 
 =cut
 

@@ -29,6 +29,10 @@ say STDERR  sprintf("%s  %s",($cfg->{hypnotoad}->{service_path}//'__UNDEF__'), (
 
 web-login.pl - Master login. The main webserver script.
 
+=head1 DESCRIPTION
+
+Not currently in use. May  be used to try local.
+
 =cut
 
 # Start command line interface for application

@@ -13,7 +13,16 @@ my $log = Mojo::Log->new;
 
 Loging module. Handle login request.
 
+=head1 SYNOPSIS
+
+use Mojolicious::Lite;
+
+...;
+
+
 =head1 DESCRIPTION
+
+One of the Controller class fir Login.
 
 =head1 ENVIRONMENT VARIABLES
 

@@ -23,7 +23,13 @@ use SH::UseLib;
 
 =head1 NAME
 
-web-login.pl - Master login. The main webserver script.
+reload-hypnotoads.pl - reload all hypnotoads
+
+=head1 DESCRIPTION
+
+Reloads all hypnotoad services.
+
+2020-06-05 Has problems reloading. Maybe use systemctl
 
 =cut
 
