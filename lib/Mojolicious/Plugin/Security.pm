@@ -155,8 +155,8 @@ Return logout link as Mojo::URL
 
 sub url_logout {
     my ($self,$c) = @_;
-    $c->session(expires=>1, message=>'url_logout');
-    die "Missing login_path in mojoapp.yml" if ! $c->config->{login_path};
+#    $c->session(expires=>1, message=>'url_logout');
+#    die "Missing login_path in mojoapp.yml" if ! $c->config->{login_path};
     return Mojo::URL->new($c->config->{login_path}.'/logout')->to_abs;
 }
 
