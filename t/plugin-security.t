@@ -32,7 +32,7 @@ sub generate_jwt {
     get '/request' => sub {
         my $c = shift;
         $DB::single=2;
-        return $c->render(text => $c->req->headers->to_string) if $c->user;
+        return $c->render(text => $c->req->headers->to_string.'</BR>'.$c->url_logout) if $c->user;
         return $c->render(status => 401, text => 'Request NOT OK');
     };
     get '/url_abspath' => sub {
