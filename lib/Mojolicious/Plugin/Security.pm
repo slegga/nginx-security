@@ -172,6 +172,20 @@ sub url_logout {
     return Mojo::URL->new($c->config->{login_path}.'/logout')->to_abs;
 }
 
+=head2 url_login
+
+Return landing page link as Mojo::URL
+
+=cut
+
+sub url_login {
+    my ($self,$c) = @_;
+#    $c->session(expires=>1, message=>'url_logout');
+#    die "Missing login_path in mojoapp.yml" if ! $c->config->{login_path};
+    return Mojo::URL->new($c->config->{login_path}.'/login')->to_abs;
+}
+
+
 =head2 url_abspath
 
 Like url_for, but return expected url with configured base path. Return string.
