@@ -366,7 +366,7 @@ sub register {
     $app->sessions->secure( $ENV{TEST_INSECURE_COOKIES} ? 0 : 1 ); # a try to fix keeping session
 
 	# Register helpers
-	for my $h(qw/is_authorized check unauthenticated unauthorized url_logout url_abspath user/ ) {
+	for my $h(qw/is_authorized check unauthenticated unauthorized url_logout url_login url_abspath user/ ) {
     	$app->helper($h => sub {$self->$h(@_)});
 	}
     for my $key (keys %$attributes) {
