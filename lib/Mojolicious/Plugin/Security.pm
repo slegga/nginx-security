@@ -79,6 +79,18 @@ Session has only sid - session id
 Username for sid is stored in sessions table.
 Never store username in session or JWT.
 
+=head1 ENVIRONMENT
+
+=over 4
+
+=item COMMON_CONFIG_DIR - set config dir
+
+=item MOJO_CONFIG - alternative config dir
+
+=item TEST_INSECURE_COOKIES - Set sessions->secure to 0
+
+=back
+
 =head1 ATTRIBUTES
 
 =over 4
