@@ -33,3 +33,14 @@
   tags: [git,perl,perlbrew,nginx,mojo]
   args:
     chdir: /home/{{ ssh_user }}/git/nginx-security/
+
+    
+#- name: reload hypnotoad
+#  command: "/bin/env /home/{{ ssh_user }}/git/perlbrew-cron/perlbrew-cron.sh /home/{{ ssh_user }}/git/utilities-perl/bin/git-status --silence"
+#  loop: "{{  shared_services  }}"
+#  tags: [git,perl,perlbrew,nginx,mojo]
+
+#- name: relaod classes
+#  command: "/bin/env /home/{{ ssh_user }}/git/perlbrew-cron/perlbrew-cron.sh /home/{{ ssh_user }}/git/utilities-perl/bin/git-status --silence"
+#  loop: "{{  shared_services  }}"
+#  tags: [git,perl,perlbrew,nginx,mojo]

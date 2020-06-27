@@ -66,15 +66,15 @@ for my $repo($gitdir->list({dir=>1})->each) {
 		$exit += xsystem(@cmd);
 	}
 }
-my @classes = ('Login','MyApp');
+# my @classes = ('Login','MyApp');
 
-for my $class (@classes) {
-		$ENV{MOJO_CLASSNAME} = $class;
-		my  $cmd = sprintf("MOJO_CLASSNAME=%s hypnotoad /home/%s/git/nginx-security/bin/mojo-start-app.pl", $class, $cfg->{master_user});
-		my @cmd =($cmd);
-		push @cmd, $ARGV[0] if $ARGV[0];
-		say join(' ',@cmd);
-		$exit += xsystem(@cmd);
-}
-say $exit if $exit;
+# for my $class (@classes) {
+#		$ENV{MOJO_CLASSNAME} = $class;
+#		my  $cmd = sprintf("MOJO_CLASSNAME=%s hypnotoad /home/%s/git/nginx-security/bin/mojo-start-app.pl", $class, $cfg->{master_user});
+#		my @cmd =($cmd);
+#		push @cmd, $ARGV[0] if $ARGV[0];
+#		say join(' ',@cmd);
+#		$exit += xsystem(@cmd);
+#}
+#say $exit if $exit;
 exit($exit);
