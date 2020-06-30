@@ -11,7 +11,7 @@ web_services:
     web-api-piano:
         blueprint_dir: "${HOME}/git/api-piano/blueprints"
         openapi_def:   api-gen.json
-    MyApp:
+    web-myapp:
         pi-status-file: /home/www/data/pi-status.json
         accesslogfile:  /home/www/log/pi-web-access.log
     Login:
