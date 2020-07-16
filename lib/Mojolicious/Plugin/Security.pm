@@ -89,6 +89,8 @@ Never store username in session or JWT.
 
 =item TEST_INSECURE_COOKIES - Set sessions->secure to 0
 
+=item TEST_USER - Set a test user. Overrule security
+
 =back
 
 =head1 ATTRIBUTES
@@ -208,7 +210,7 @@ sub user {
     say STDERR "USER:$_" for @_;
     my $self = shift;
 	my $c   = shift;  # Mojolicious::Controller
-
+    return {username=>$ENV{TEST_USER},groups=>['all']} if $ENV{TEST_USER};
 	my $headers = $c->tx->req->headers;
 
 	#GET USER

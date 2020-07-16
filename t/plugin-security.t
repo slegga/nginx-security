@@ -69,4 +69,6 @@ is ($t->app->config->{hypnotoad}->{service_path}, 'foo','Check path');
 # this test does not work because Mojolicious::Plugin::Security has it own config and is not dependant on the global one.
 # $t->app->config->{hypnotoad}->{service_path} = 'base';
 # $t->get_ok('/url_abspath')->status_is(200)->content_is('/base/info');
+
+
 done_testing();
