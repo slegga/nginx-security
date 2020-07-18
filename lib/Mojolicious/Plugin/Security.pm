@@ -338,21 +338,22 @@ sub is_authorized {
 }
 
 
-#=head2 padd5
+=head2 security_info
 
-#Padd for TOPT
+For debugging and testing. Get info about classvalues
 
-#=cut
+=cut
 
-#sub _padd5 {
-#    my $token = shift;
-#    while (length $token < 6) {
-#        $token = "0$token";
-#    }
-#    return $token;
-#}
+sub security_info {
+    my ($self, $c) =@_;
+    my $return={};
+    for my $key(qw/main_module_name authorized_groups/) {
+        $return->{$key} = $self->$key;
+    }
+# config
+    return $return;
 
-
+}
 
 =head2 register
 
@@ -368,7 +369,7 @@ sub register {
     $app->sessions->secure( $ENV{TEST_INSECURE_COOKIES} ? 0 : 1 ); # a try to fix keeping session
 
 	# Register helpers
-	for my $h(qw/is_authorized check unauthenticated unauthorized url_logout url_login url_abspath user/ ) {
+	for my $h(qw/is_authorized check unauthenticated unauthorized url_logout url_login url_abspath user security_info/ ) {
     	$app->helper($h => sub {$self->$h(@_)});
 	}
     for my $key (keys %$attributes) {
