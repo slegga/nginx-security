@@ -157,6 +157,7 @@ Return standard webpage when trying to access restricted pages
 
 sub unauthorized {
     my ($self,$c) = @_;
+    $c->res->code(403);
     $c->render(code=>403,text => 'You are not authorized to view this page. Contact the webmaster. Your username is '.$c->user->{username}. ' Your groups are '.join (',',@{$c->user->{groups}||[]}). '. You need: ' .join(',',@{$self->authorized_groups}));
     return undef; ##no critic
 }
