@@ -320,20 +320,24 @@ sub check {
 =head2 is_authorized
 
 Check authorisation. Check users group with authorized groups and return 1 if matching group is found.
+If and array ref is given after $c, use this list of authorized groups insted of the default.
 
 =cut
 
 sub is_authorized {
-    my ($self, $c) =@_;
+    my ($self, $c, $author_grp) =@_;
     $DB::single=2;
     my $user_hr = $self->user($c);
     if (! $user_hr) {
         $c->log->error("User has not logged in. Authenticate before authorize.");
         return;
     }
+    if (ref $author_grp ne 'ARRAY') {
+        $author_grp = $self->authorized_groups;
+    }
     return 1 if ! $self->authorized_groups || ! @{$self->authorized_groups}; # all are welcome
     for my $g(@{$self->authorized_groups}) {
-        return 1  if grep {$g eq $_} @{$self->user($c)->{groups}};
+         return 1  if grep {$g eq $_} @{$self->user($c)->{groups}};
     }
     return; #unauthorized
 }
