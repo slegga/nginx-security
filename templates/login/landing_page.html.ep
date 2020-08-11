@@ -11,6 +11,7 @@ Du er medlem av følgende grupper:
 <br></br>
 <p>
 Du har tilgang til følgende:
+<BR>
 %# my $wsa = {$we};
 %# $wsa = config->{hypnotoad}->{web_services} if exists config->{hypnotoad}->{web_services};
 % for my $service (sort keys %$web_services) {
