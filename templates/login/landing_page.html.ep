@@ -14,7 +14,7 @@ You ar member of following groups:
 % for my $service (keys %$web_services) {
 % my $ag = $web_services->{$service}->{authorized_groups};
 
-#check if user has required group. If no required group the hole world is accepted.
+%# check if user has required group. If no required group the hole world is accepted.
 % if ($ag &&  @$ag ) {
 %    my $acc = 0;
 %    for my $a(@$ag) {
