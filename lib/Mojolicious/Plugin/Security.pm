@@ -360,6 +360,8 @@ sub security_info {
 
 }
 
+=head1 METHODS
+
 =head2 register
 
 Auto called from Mojolicious. Do the setup.

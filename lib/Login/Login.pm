@@ -30,6 +30,8 @@ One of the Controller class fir Login.
 
 =item TEST_INSECURE_COOKIES - Turn of secure from cookie for testing with hhtp
 
+=item COMMON_CONFIG_DIR - Set config dir. Usually for testing.
+
 =back
 
 =head1 METHODS

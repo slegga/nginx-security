@@ -24,6 +24,16 @@ Login
 
 Main lib for Nginx Login page.
 
+=head1 ENVIRONMENT VARIABLES
+
+=over 4
+
+=item COMMON_CONFIG_DIR - Set config dir. Config dir defaults to $HOME/etc
+
+=item MOJO_CONFIG - Alternative config dir
+
+=back
+
 =head1 METHODS
 
 =head2 startup
@@ -34,7 +44,7 @@ Main loop for Login page.
 
 has users => sub {
     my $users;
-    my $userfile = $ENV{COMMON_CONFIG_DIR}||$ENV{MOJO_CONFIG}||"$FindBin::Bin/../../../etc";
+    my $userfile = $ENV{COMMON_CONFIG_DIR}||$ENV{MOJO_CONFIG}||"$ENV{HOME}/etc";
     $userfile .= "/users.yml";
     # warn $userfile;
     die "Missing users.yml file $userfile. Please add" if (! -r $userfile );
