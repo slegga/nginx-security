@@ -10,14 +10,24 @@
   become_user: www
 # End tasks
 
-#- name: reload toadfarm
-#  command: "/bin/env /home/{{ ssh_user }}/git/perlbrew-cron/perlbrew-cron.sh script/toadfarm.pl reload"
-#  become: yes
-#  become_user: www
-#  tags: [git,perl,perlbrew,nginx]
-#  args:
-#    chdir: /home/{{ ssh_user }}/git/webserver/
-# PERLBREW_ROOT=/opt/perl5 PERLBREW_HOME=/home/www/.perlbrew PATH=$PATH:/usr/local/bin
+- cron:
+    name: "certbot renew"
+    minute: "39"
+    hour: "19"
+    job: "/usr/bin/bash -l -c '/usr/bin/certbot renew'  2>&1 |/home/stein/git/utilities-perl/bin/alert.pl"
+  become: true
+  tags: [nginx]
+
+- cron:
+    name: "auto reload webserver"
+    minute: "40"
+    hour: "1"
+    job: "/home/{{ ssh_user }}/git/perlbrew-cron/perlbrew-cron.sh /home/{{ ssh_user }}/git/nginx-security/bin/reload-hypnotoads.pl >>~/log/crontab/toadfarm.log"
+  become: true
+  become_user: www
+  tags: [nginx]
+
+
 
 - name: update git
   command: "/bin/env /home/{{ ssh_user }}/git/perlbrew-cron/perlbrew-cron.sh /home/{{ ssh_user }}/git/utilities-perl/bin/git-status --silence"
@@ -34,7 +44,7 @@
   args:
     chdir: /home/{{ ssh_user }}/git/nginx-security/
 
-    
+
 #- name: reload hypnotoad
 #  command: "/bin/env /home/{{ ssh_user }}/git/perlbrew-cron/perlbrew-cron.sh /home/{{ ssh_user }}/git/utilities-perl/bin/git-status --silence"
 #  loop: "{{  shared_services  }}"
