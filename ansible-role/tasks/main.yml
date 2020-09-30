@@ -27,6 +27,14 @@
   become_user: www
   tags: [nginx]
 
+- cron:
+    name: "Alert if not messages from pi"
+    minute: "40"
+    hour: "16"
+    job: "/home/{{ ssh_user }}/git/perlbrew-cron/perlbrew-cron.sh /home/{{ ssh_user }}/git/webserver/bin/uptime-pi-alert.pl 2>&1 | /home/{{ ssh_user }}/git/perlbrew-cron/perlbrew-cron.sh /home/{{ ssh_user }}/git/utilities-perl/bin/alert.pl"
+  become: true
+  become_user: www
+  tags: [nginx]
 
 
 - name: update git
