@@ -14,7 +14,7 @@
     name: "certbot renew"
     minute: "39"
     hour: "19"
-    job: "/usr/bin/bash -l -c '/usr/bin/certbot renew'  2>&1 |/home/stein/git/utilities-perl/bin/alert.pl"
+    job: "/usr/bin/bash -l -c '/usr/bin/certbot renew'  2>&1 |/home/{{ ssh_user }}/git/utilities-perl/bin/alert.pl"
   become: true
   tags: [nginx]
 
