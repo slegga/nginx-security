@@ -21,7 +21,7 @@ Du har tilgang til følgende:
 % next if ! is_authorized( $c, $ag );
 % my $s = $service;
 % $s =~ s/^web\-//;
-%= link_to $s => "/" . $web_services->{$service}->{service_path};
+%= link_to $s => "/" . $web_services->{$service}->{service_path}.'/';
 <BR>
 % }
 %= link_to logout => '/xlogin/logout'
