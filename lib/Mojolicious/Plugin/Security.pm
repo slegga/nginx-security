@@ -197,7 +197,10 @@ Like url_for, but return expected url with configured base path. Return string.
 
 sub url_abspath {
     my ($self,$c,$local_path) = @_;
-    my $return = $c->url_for->path->parts([$c->config->{hypnotoad}->{service_path}, $local_path]);
+    my $parts=[];
+    push @$parts, $c->config->{hypnotoad}->{service_path} if $c->config->{hypnotoad}->{service_path};
+    push @$parts, $local_path;
+    my $return = $c->url_for->path->parts($parts);
     return $return;
 }
 
