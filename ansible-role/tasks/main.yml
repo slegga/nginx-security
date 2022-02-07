@@ -22,7 +22,7 @@
     name: "auto reload webserver"
     minute: "40"
     hour: "1"
-    job: "/home/{{ ssh_user }}/git/perlbrew-cron/perlbrew-cron.sh /home/{{ ssh_user }}/git/nginx-security/bin/reload-hypnotoads.pl >>~/log/crontab/toadfarm.log"
+    job: "/home/{{ ssh_user }}/git/nginx-security/bin/reload-hypnotoads.pl >>~/log/crontab/toadfarm.log"
   become: true
   become_user: www
   tags: [nginx]
@@ -31,34 +31,24 @@
     name: "Alert if not messages from pi"
     minute: "40"
     hour: "16"
-    job: "/home/{{ ssh_user }}/git/perlbrew-cron/perlbrew-cron.sh /home/{{ ssh_user }}/git/webserver/bin/uptime-pi-alert.pl 2>&1 | /home/{{ ssh_user }}/git/perlbrew-cron/perlbrew-cron.sh /home/{{ ssh_user }}/git/utilities-perl/bin/alert.pl"
+    job: "/home/{{ ssh_user }}/git/webserver/bin/uptime-pi-alert.pl 2>&1 | /home/{{ ssh_user }}/git/perlbrew-cron/perlbrew-cron.sh /home/{{ ssh_user }}/git/utilities-perl/bin/alert.pl"
   become: true
   become_user: www
   tags: [nginx]
 
 
 - name: update git
-  command: "/bin/env /home/{{ ssh_user }}/git/perlbrew-cron/perlbrew-cron.sh /home/{{ ssh_user }}/git/utilities-perl/bin/git-status --silence"
+  command: "/usr/bin/env /home/{{ ssh_user }}/git/utilities-perl/bin/git-status --silence"
   tags: [git,perl,perlbrew,nginx,mojo]
 #  args:
 #    chdir: /home/{{ ssh_user }}/git/nginx-security/
 
 
 - name: reload hypnotoad
-  command: "/bin/env /home/{{ ssh_user }}/git/perlbrew-cron/perlbrew-cron.sh bin/reload-hypnotoads.pl"
+  command: "/usr/bin/env bin/reload-hypnotoads.pl"
   become: yes
   become_user: www
   tags: [git,perl,perlbrew,nginx,mojo]
   args:
     chdir: /home/{{ ssh_user }}/git/nginx-security/
 
-
-#- name: reload hypnotoad
-#  command: "/bin/env /home/{{ ssh_user }}/git/perlbrew-cron/perlbrew-cron.sh /home/{{ ssh_user }}/git/utilities-perl/bin/git-status --silence"
-#  loop: "{{  shared_services  }}"
-#  tags: [git,perl,perlbrew,nginx,mojo]
-
-#- name: relaod classes
-#  command: "/bin/env /home/{{ ssh_user }}/git/perlbrew-cron/perlbrew-cron.sh /home/{{ ssh_user }}/git/utilities-perl/bin/git-status --silence"
-#  loop: "{{  shared_services  }}"
-#  tags: [git,perl,perlbrew,nginx,mojo]
