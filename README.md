@@ -12,4 +12,4 @@ perl -MMojo::JWT -e 'print Mojo::JWT->new(secret=>"abc")->decode("eyJhbGciOiJIUz
 #. Create session table
 #. ssh <server>
 #. sudo su - www
-#. www@debian:~/etc$ sqlite3 session_store.db < /home/stein/git/nginx-security/sql/table_defs.sql
+#. www@debian:~/etc$ sqlite3 session_store.db < /home/[ssh_user]/git/nginx-security/sql/table_defs.sql
