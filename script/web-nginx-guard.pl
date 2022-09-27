@@ -36,13 +36,12 @@ get '/' => sub {
 	my $c = shift;
 #	$c->render(status=>200, text => 'Allowed');
 	my $headers = $c->tx->req->headers;
-	my $uri      = Mojo::URL->new( $headers->header('X-Original-URI')||'');
-
-    if ( !$uri or !defined $uri->scheme or $uri->scheme ne 'https' ) {
+	my $uri      = Mojo::URL->new( $headers->header('X-Original-URI')||$headers->header('x-original-uri')||'');
+    if ( !$uri or ((!defined $uri->scheme or $uri->scheme ne 'https') and  ! $ENV{ TEST_INSECURE_COOKIES })) {
         # X-Original-URI is set by nginx
         # The guard require https to prevent man-in-the-middle cookie stealing
         $c->app->log->error("nginx is not configured correctly: X-Original-URI is invalid. ($uri)");
-        $c->render( text => 'nginx is not configured.', status => 500 );
+        return $c->render( text => 'nginx is not configured.', status => 500 );
     }
 
 	#GET SID

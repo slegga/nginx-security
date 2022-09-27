@@ -6,6 +6,8 @@ use Carp::Always;
 use Mojo::JWT;
 use Mojo::Util 'secure_compare';
 use lib '.';
+use Data::Dumper;
+$ENV{TEST_INSECURE_COOKIES} = 1;
 $ENV{COMMON_CONFIG_DIR} ='t/etc';
 my $secret = (split(/[\n\s]+/,path($ENV{COMMON_CONFIG_DIR},'secrets.txt')->slurp))[0];
 diag '$secret = '.$secret;
@@ -18,13 +20,16 @@ $db->insert('sessions',{sid=>'123', username=>'admin',status=>'active'});
 
 my $jwt = Mojo::JWT->new(claims=>{sid=>'123',expires => time + 60},secret=>$secret)->encode;
 
-$t->get_ok('/')->status_is(401);
+# request with out cookie
+my $tx = $t->ua->build_tx(GET => '/');
+$tx->req->headers->add('X-Original-URI' => '/spennendesaker');
+$t->request_ok($tx)->status_is(401);
 
 # Request with custom cookie
-my $tx = $t->ua->build_tx(GET => '/');
-$tx->req->cookies({name=>'sso-jwt-token', value=> $jwt});
-$tx->req->headers->header('X-Original-URI' => '/spennendesaker');
-$t->request_ok($tx)->status_is(200)->content_is('Logged in');
+my $tx2 = $t->ua->build_tx(GET => '/');
+$tx2->req->cookies({name=>'sso-jwt-token', value=> $jwt});
+$tx2->req->headers->add('X-Original-URI' => '/spennendesaker');
+$t->request_ok($tx2)->status_is(200)->content_is('Logged in');
 
 #$t->tx->req->cookie('X-Original-URI' => '/spennendesaker');
 #$t->tx->req->cookie();
