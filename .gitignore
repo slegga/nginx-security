@@ -1,4 +1,4 @@
 t/playground/*
 t/data/*
-t/etc/session_store.db
+t/etc/session_store.db*
 .prove
