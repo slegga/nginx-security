@@ -65,13 +65,13 @@ sub startup {
 #	$self->mode('development');
     $self->app->sessions->secure( $ENV{TEST_INSECURE_COOKIES} ? 0 : 1 ); # a try to fix keeping session
     $self->app->sessions->samesite('None');
-	$DB::single=2;
+	$DB::single = 2;
 	my $config =  $self->config;
 
 	if ( scalar keys %{$config} < 3 ) {
 		say STDERR Dumper $config;
 		my $gcc = Model::GetCommonConfig->new;
-		$config = $gcc->get_mojoapp_config(__PACKAGE__,{debug=>1});
+		$config = $gcc->get_mojoapp_config('web-login',{debug=>1});
 
 		$self->config($config);
 	} else {

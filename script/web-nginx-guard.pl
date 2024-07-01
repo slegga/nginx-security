@@ -16,7 +16,7 @@ helper db => sub {Mojo::SQLite->new(shift->config->{login_db_dir}. '/session_sto
 my $gcc = Model::GetCommonConfig->new;
 #my $name = fileparse($0,'.pl');
 #plugin Config => {toadfarm => $gcc->get_hypnotoad_config($0) };
-$DB::single=2;
+$DB::single = 2;
 app->config($gcc->get_mojoapp_config($0));
 #app->config(hypnotoad => $gcc->get_hypnotoad_config($0));
 app->secrets(app->config->{secrets});
